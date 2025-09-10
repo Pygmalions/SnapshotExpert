@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Title>Snapshot Expert</Title>
+        <Authors>Pygmalions</Authors>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Description>A library for automatic BSON/JSON snapshot serailization, with built-in support for reference tracking.</Description>
+        <PackageProjectUrl>https://github.com/Pygmalions/SnapshotExpert</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Pygmalions/SnapshotExpert</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Serialization BSON JSON Automated-Serialization Serializer-Generator IL-Emitting</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <LangVersion>preview</LangVersion>
+        <Version>0.3.0-dev09102053</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>SnapshotExpert.Test</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="DocumentationParser" Version="0.1.0"/>
+        <PackageReference Include="EmitToolbox" Version="0.3.0-dev09101844"/>
+        <PackageReference Include="InjectionExpert" Version="0.3.0-dev09092308"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8"/>
+        <PackageReference Include="MongoDB.Bson" Version="3.4.3"/>
+    </ItemGroup>
+
+    <Target Name="InjectPackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec" Condition="Exists('RELEASE_NOTE.txt')">
+        <PropertyGroup>
+            <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/RELEASE_NOTE.txt"))</PackageReleaseNotes>
+        </PropertyGroup>
+    </Target>
+</Project>
