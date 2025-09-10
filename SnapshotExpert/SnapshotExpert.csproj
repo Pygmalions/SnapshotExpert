@@ -29,8 +29,8 @@
 
     <ItemGroup>
         <PackageReference Include="DocumentationParser" Version="0.1.0"/>
-        <PackageReference Include="EmitToolbox" Version="0.3.0-dev09101844"/>
-        <PackageReference Include="InjectionExpert" Version="0.3.0-dev09092308"/>
+        <PackageReference Include="EmitToolbox" Version="0.3.0-dev09102111" />
+        <PackageReference Include="InjectionExpert" Version="0.3.0-dev09102118" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8"/>
         <PackageReference Include="MongoDB.Bson" Version="3.4.3"/>
     </ItemGroup>
