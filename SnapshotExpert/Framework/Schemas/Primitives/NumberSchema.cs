@@ -3,7 +3,7 @@ using SnapshotExpert.Framework.Values.Primitives;
 
 namespace SnapshotExpert.Framework.Schemas.Primitives;
 
-public class NumberSchema() : PrimitiveSchema(JsonValueType.Number)
+public record NumberSchema() : PrimitiveSchema(JsonValueType.Number)
 {
     public decimal? MinimumValue { get; init; } = null;
 

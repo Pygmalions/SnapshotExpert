@@ -2,7 +2,7 @@ using SnapshotExpert.Framework.Values;
 
 namespace SnapshotExpert.Framework.Schemas.Composite;
 
-public class AnyOfSchema : SnapshotSchema
+public record AnyOfSchema : SnapshotSchema
 {
     public required IReadOnlyCollection<SnapshotSchema> Schemas { get; init; }
 

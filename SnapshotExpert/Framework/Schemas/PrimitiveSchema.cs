@@ -2,7 +2,7 @@
 
 namespace SnapshotExpert.Framework.Schemas;
 
-public abstract class PrimitiveSchema : SnapshotSchema
+public abstract record class PrimitiveSchema : SnapshotSchema
 {
     protected PrimitiveSchema(params Span<JsonValueType> types)
     {

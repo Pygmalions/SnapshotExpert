@@ -21,15 +21,7 @@ public class NullableValueSnapshotSerializer<TValue> : SnapshotSerializer<TValue
 
     protected override SnapshotSchema GenerateSchema()
     {
-        return new OneOfSchema
-        {
-            Title = $"Nullable {typeof(TValue)}",
-            Schemas =
-            [
-                new NullSchema(),
-                ValueSerializer.Schema
-            ]
-        };
+        return ValueSerializer.Schema with { IsNullable = true };
     }
 
     public override void NewInstance(out TValue? instance) => instance = null;

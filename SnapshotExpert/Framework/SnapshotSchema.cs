@@ -5,7 +5,7 @@ using SnapshotExpert.Framework.Values.Primitives;
 
 namespace SnapshotExpert.Framework;
 
-public abstract class SnapshotSchema
+public abstract record SnapshotSchema
 {
     /// <summary>
     /// Title of the schema.

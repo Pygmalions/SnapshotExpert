@@ -2,7 +2,7 @@ using SnapshotExpert.Framework.Values;
 
 namespace SnapshotExpert.Framework.Schemas.Primitives;
 
-public class ArraySchema() : PrimitiveSchema(JsonValueType.Array)
+public record ArraySchema() : PrimitiveSchema(JsonValueType.Array)
 {
     /// <summary>
     /// Schema for items in this array.

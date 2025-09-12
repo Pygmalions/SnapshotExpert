@@ -5,7 +5,7 @@ using SnapshotExpert.Framework.Values.Primitives;
 
 namespace SnapshotExpert.Framework.Schemas.Primitives;
 
-public class StringSchema() : PrimitiveSchema(JsonValueType.String)
+public record StringSchema() : PrimitiveSchema(JsonValueType.String)
 {
     /// <summary>
     /// A hint on the format of the string, only for documentation purposes.

@@ -3,7 +3,7 @@ using SnapshotExpert.Framework.Values.Primitives;
 
 namespace SnapshotExpert.Framework.Schemas.Primitives;
 
-public class BooleanSchema() : PrimitiveSchema(JsonValueType.Boolean)
+public record BooleanSchema() : PrimitiveSchema(JsonValueType.Boolean)
 {
     protected override void OnGenerate(ObjectValue schema)
     {}

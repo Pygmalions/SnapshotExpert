@@ -3,8 +3,12 @@ using SnapshotExpert.Framework.Values.Primitives;
 
 namespace SnapshotExpert.Framework.Schemas.Primitives;
 
-public class TypesSchema(params Span<JsonValueType> types) : PrimitiveSchema(types)
+public record TypesSchema : PrimitiveSchema
 {
+    public TypesSchema(params Span<JsonValueType> types) : base(types)
+    {
+    }
+    
     protected override void OnGenerate(ObjectValue schema)
     {
     }

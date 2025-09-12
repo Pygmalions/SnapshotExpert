@@ -2,7 +2,7 @@ using SnapshotExpert.Framework.Values;
 
 namespace SnapshotExpert.Framework.Schemas.Primitives;
 
-public class TupleSchema() : PrimitiveSchema(JsonValueType.Array)
+public record TupleSchema() : PrimitiveSchema(JsonValueType.Array)
 {
     public required IReadOnlyCollection<SnapshotSchema> Items { get; init; }
     

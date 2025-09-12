@@ -3,7 +3,7 @@ using SnapshotExpert.Framework.Values.Primitives;
 
 namespace SnapshotExpert.Framework.Schemas.Primitives;
 
-public class NullSchema : PrimitiveSchema
+public record NullSchema : PrimitiveSchema
 {
     public NullSchema()
     {

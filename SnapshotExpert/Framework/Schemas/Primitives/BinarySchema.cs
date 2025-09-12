@@ -5,7 +5,7 @@ using SnapshotExpert.Framework.Values.Primitives;
 
 namespace SnapshotExpert.Framework.Schemas.Primitives;
 
-public class BinarySchema : SnapshotSchema
+public record BinarySchema : SnapshotSchema
 {
     private static readonly ObjectSchema Schema = new()
     {
