@@ -1,5 +1,6 @@
 ﻿using SnapshotExpert.Framework;
 using SnapshotExpert.Framework.Schemas.Primitives;
+using SnapshotExpert.Framework.Values;
 using SnapshotExpert.Framework.Values.Primitives;
 
 namespace SnapshotExpert.Serializers.Primitives;
@@ -20,7 +21,7 @@ public class Float32SnapshotSerializer : SnapshotSerializer<float>
         => snapshot.Value = new Float64Value(target);
 
     public override void LoadSnapshot(ref float target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = (float)snapshot.RequireValue<Float64Value>().Value;
+        => target = (float)snapshot.RequireNumber<IFloat64Number>().Value;
 }
 
 public class Float64SnapshotSerializer : SnapshotSerializer<double>
@@ -39,5 +40,5 @@ public class Float64SnapshotSerializer : SnapshotSerializer<double>
         => snapshot.Value = new Float64Value(target);
 
     public override void LoadSnapshot(ref double target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireValue<Float64Value>().Value;
+        => target = snapshot.RequireNumber<IFloat64Number>().Value;
 }

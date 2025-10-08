@@ -43,6 +43,30 @@ public static class SnapshotNodeExtensions
                 $"but {typeof(TSnapshotValue)} is expected.");
         return typedValue;
     }
+
+    /// <summary>
+    /// Acquire the value of the specified snapshot node,
+    /// or throw an exception if the value is not of the expected type.
+    /// </summary>
+    /// <param name="node">Node to acquire snapshot value from.</param>
+    /// <typeparam name="TNumberInterface">Required number interface of the snapshot value.</typeparam>
+    /// <returns>Snapshot value of the required type from the specified snapshot node.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Throw if no value is bound to the specified snapshot node,
+    /// or if the value is not of the expected type.
+    /// </exception>
+    public static TNumberInterface RequireNumber<TNumberInterface>(this SnapshotNode node) 
+        where TNumberInterface : INumberInterface
+    {
+        if (node.Value is null)
+            throw new InvalidOperationException(
+                "Unexpected snapshot value: no value is bound to the specified snapshot node.");
+        if (node.Value is not TNumberInterface typedValue)
+            throw new InvalidOperationException(
+                $"Unexpected snapshot value: snapshot value is of type {node.Value.GetType()}, " +
+                $"but {typeof(TNumberInterface)} is expected.");
+        return typedValue;
+    }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AssignNull(this SnapshotNode node)

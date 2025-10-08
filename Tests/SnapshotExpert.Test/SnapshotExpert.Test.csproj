@@ -24,8 +24,4 @@
       <ProjectReference Include="..\..\SnapshotExpert\SnapshotExpert.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Framework\" />
-    </ItemGroup>
-
 </Project>

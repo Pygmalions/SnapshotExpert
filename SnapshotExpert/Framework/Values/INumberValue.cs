@@ -1,21 +1,25 @@
 ﻿namespace SnapshotExpert.Framework.Values;
 
-public interface IInteger32Number
+public interface INumberInterface
+{
+}
+
+public interface IInteger32Number : INumberInterface
 {
     int Value { get; set; }
 }
 
-public interface IInteger64Number
+public interface IInteger64Number : INumberInterface
 {
     long Value { get; set; }
 }
 
-public interface IFloat64Number
+public interface IFloat64Number : INumberInterface
 {
     double Value { get; set; }
 }
 
-public interface IDecimalNumber
+public interface IDecimalNumber : INumberInterface
 {
     decimal Value { get; set; }
 }

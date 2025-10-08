@@ -14,7 +14,7 @@
         <PackageTags>Serialization BSON JSON Automated-Serialization Serializer-Generator IL-Emitting</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <LangVersion>preview</LangVersion>
-        <Version>0.3.0-dev09121345</Version>
+        <Version>0.3.0-dev10090057</Version>
     </PropertyGroup>
 
     <ItemGroup>
