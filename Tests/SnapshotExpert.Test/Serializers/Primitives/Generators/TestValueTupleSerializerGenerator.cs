@@ -1,0 +1,64 @@
+﻿using SnapshotExpert.Data;
+using SnapshotExpert.Data.Values;
+using SnapshotExpert.Data.Values.Primitives;
+using SnapshotExpert.Serializers.Primitives.Generators;
+
+namespace SnapshotExpert.Test.Serializers.Primitives.Generators;
+
+[TestFixture, TestOf(typeof(ValueTupleSerializerGenerator))]
+public class TestValueTupleSerializerGenerator
+{
+    private SerializerContainer _context;
+
+    [SetUp]
+    public void Initialize()
+    {
+        _context = new SerializerContainer();
+    }
+
+    [Test]
+    public void GenerateSerializerInstance()
+    {
+        var serializer = _context.RequireSerializer<ValueTuple<int, int>>();
+        Assert.That(serializer, Is.Not.Null);
+    }
+
+    [Test]
+    public void SaveSnapshot()
+    {
+        var serializer = _context.RequireSerializer<ValueTuple<int, int>>();
+
+        var value = (TestContext.CurrentContext.Random.Next(),
+            TestContext.CurrentContext.Random.Next());
+        
+        var node = new SnapshotNode();
+        serializer.SaveSnapshot(value, node);
+
+        Assert.That(node.Value, Is.InstanceOf<ArrayValue>());
+        var values = node.RequireValue<ArrayValue>()
+            .Nodes
+            .Select(subnode => subnode.Value)
+            .OfType<Integer32Value>()
+            .Select(subvalue => subvalue.Value);
+        Assert.That(values, Is.EquivalentTo(new [] { value.Item1, value.Item2 }));
+    }
+
+    [Test]
+    public void LoadSnapshot()
+    {
+        var serializer = _context.RequireSerializer<ValueTuple<int, int>>();
+
+        var value = (TestContext.CurrentContext.Random.Next(),
+            TestContext.CurrentContext.Random.Next());
+        
+        var node = new SnapshotNode();
+        node.AssignArray([ 
+            new Integer32Value(value.Item1),
+            new Integer32Value(value.Item2)
+        ]);
+        
+        serializer.NewInstance(out var restored);
+        serializer.LoadSnapshot(ref restored, node);
+        Assert.That(restored, Is.EqualTo(value));
+    }
+}

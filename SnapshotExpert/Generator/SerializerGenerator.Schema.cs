@@ -1,11 +1,12 @@
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Text;
 using DocumentationParser;
-using EmitToolbox.Extensions;
 using EmitToolbox.Framework;
-using SnapshotExpert.Framework;
-using SnapshotExpert.Framework.Schemas.Primitives;
+using EmitToolbox.Framework.Extensions;
+using EmitToolbox.Framework.Symbols;
+using EmitToolbox.Framework.Utilities;
+using SnapshotExpert.Data;
+using SnapshotExpert.Data.Schemas.Primitives;
 
 namespace SnapshotExpert.Generator;
 
@@ -45,106 +46,88 @@ public partial class SerializerGenerator
     {
         private ClassContext _context = null!;
 
-        private InstanceDynamicField _fieldDocumentation = null!;
+        private FieldSymbol<IDocumentationProvider?> _fieldDocumentation = null!;
 
-        private InstanceDynamicFunctor _method = null!;
+        private DynamicMethod<Action<ISymbol<SnapshotSchema>>> _method = null!;
 
-        private LocalBuilder _variableRequiredProperties = null!;
-
-        private LocalBuilder _variableMemberSchema = null!;
+        private VariableSymbol<OrderedDictionary<string, SnapshotSchema>> _variableRequiredProperties = null!;
 
         public void Initialize(ClassContext context)
         {
             _context = context;
 
-            _fieldDocumentation = context.TypeContext.FieldBuilder.DefineInstance(
-                "DocumentationProvider", typeof(IDocumentationProvider));
-            _fieldDocumentation.MarkAttribute(AttributeInjectionMember);
-
-            _method = _context.TypeContext.FunctorBuilder
-                .Override(typeof(SnapshotSerializer).GetMethod("GenerateSchema",
+            _method = _context.TypeContext.MethodFactory.Instance
+                .OverrideFunctor<SnapshotSchema>(typeof(SnapshotSerializer).GetMethod("GenerateSchema",
                     BindingFlags.NonPublic | BindingFlags.Instance)!);
-
-            var code = _method.Code;
-
-            _variableMemberSchema = code.DeclareLocal(typeof(SnapshotSchema));
-
-            // Initialize the dictionary of required properties .
-            _variableRequiredProperties = code.DeclareLocal(typeof(ObjectSchema));
-            code.Emit(OpCodes.Newobj,
-                typeof(OrderedDictionary<string, SnapshotSchema>).GetConstructor(Type.EmptyTypes)!);
-            code.StoreLocal(_variableRequiredProperties);
+            
+            _fieldDocumentation = context.TypeContext.FieldFactory
+                .DefineInstance(
+                    "Documentation", typeof(IDocumentationProvider))
+                .MarkAttribute(AttributeInjectionMember)
+                .SymbolOf<IDocumentationProvider?>(_method, _method.This());
+            
+            _variableRequiredProperties = _method.New<OrderedDictionary<string, SnapshotSchema>>();
         }
 
         public void Complete()
         {
-            var code = _method.Code;
+            var variableObjectSchema = _method.New<ObjectSchema>();
 
-            var variableResult = code.DeclareLocal(typeof(ObjectSchema));
-            code.NewObject(typeof(ObjectSchema).GetConstructor(Type.EmptyTypes)!);
-            code.StoreLocal(variableResult);
+            variableObjectSchema.SetPropertyValue(
+                target => target.RequiredProperties!,
+                _variableRequiredProperties);
+            
+            var variableDocumentation = _method
+                .Invoke(() => SchemaHelper.RetrieveDocumentation(
+                        Any<string>.Value, Any<IDocumentationProvider?>.Value)!,
+                    [
+                        _method.Value(EntryName.Of(_context.TargetType)),
+                        _fieldDocumentation
+                    ])
+                .ToSymbol();
 
-            // Bind required properties.
-            code.LoadLocal(variableResult);
-            code.LoadLocal(_variableRequiredProperties);
-            code.StoreProperty(typeof(ObjectSchema).GetProperty(nameof(ObjectSchema.RequiredProperties))!);
-
-            // Set the title to the target type name.
-            code.LoadLocal(variableResult);
-            code.LoadLiteral(_context.TargetType.ToString());
-            code.StoreProperty(typeof(ObjectSchema).GetProperty(nameof(ObjectSchema.Title))!);
-
-            EmitInjectDocumentation(variableResult, EntryName.Of(_context.TargetType));
-
-            code.LoadLocal(variableResult);
-            code.MethodReturn();
+            using (_method.If(variableDocumentation.IsNotNull()))
+            {
+                variableObjectSchema.SetPropertyValue(
+                    target => target.Description!,
+                    variableDocumentation);
+            }
+            
+            _method.Return(variableObjectSchema);
         }
 
         public void Generate(FieldInfo field, MemberInfo metadata)
         {
-            var code = _method.Code;
+            var fieldSerializer = _context.GetSerializerField(field.FieldType)
+                .SymbolOf(_method, _method.This());
+            var variableMemberSchema =
+                fieldSerializer
+                    .GetPropertyValue<SnapshotSchema>(
+                        typeof(SnapshotSerializer).GetProperty(nameof(SnapshotSerializer.Schema))!)
+                    .ToSymbol();
 
-            _context.EmitLoadSerializer(code, field.FieldType);
-            code.LoadProperty(
-                typeof(SnapshotSerializer).GetProperty(nameof(SnapshotSerializer.Schema))!);
-            code.StoreLocal(_variableMemberSchema);
+            var variableDocumentation = _method
+                .Invoke(() => SchemaHelper.RetrieveDocumentation(
+                        Any<string>.Value, Any<IDocumentationProvider?>.Value)!,
+                    [
+                        _method.Value(EntryName.Of(metadata)),
+                        _fieldDocumentation
+                    ])
+                .ToSymbol();
 
-            EmitInjectDocumentation(_variableMemberSchema, EntryName.Of(metadata));
+            using (_method.If(variableDocumentation.IsNotNull()))
+            {
+                variableMemberSchema.SetPropertyValue(
+                    target => target.Description!,
+                    variableDocumentation);
+            }
 
-            code.LoadLocal(_variableRequiredProperties);
-            code.LoadLiteral(metadata.Name);
-            code.LoadLocal(_variableMemberSchema);
-            code.CallVirtual(typeof(OrderedDictionary<string, SnapshotSchema>)
-                .GetMethod(nameof(OrderedDictionary<,>.Add))!);
-
-            code.LoadNull();
-            code.StoreLocal(_variableMemberSchema);
-        }
-
-        private void EmitInjectDocumentation(LocalBuilder variableSchema, string entryName)
-        {
-            var code = _method.Code;
-
-            // Try to retrieve documentation for this entry.
-            var codeDocumentation = code.DeclareLocal(typeof(string));
-
-            code.LoadLiteral(entryName);
-            code.LoadArgument_0();
-            code.LoadField(_fieldDocumentation.BuildingField);
-            code.Call(typeof(SchemaHelper).GetMethod(nameof(SchemaHelper.RetrieveDocumentation))!);
-
-            code.StoreLocal(codeDocumentation);
-
-            var labelNoDocumentation = code.DefineLabel();
-            code.LoadLocal(codeDocumentation);
-            code.GotoIfFalse(labelNoDocumentation);
-
-            // Set the description if there is documentation.
-            code.LoadLocal(variableSchema);
-            code.LoadLocal(codeDocumentation);
-            code.StoreProperty(typeof(ObjectSchema).GetProperty(nameof(ObjectSchema.Description))!);
-
-            code.MarkLabel(labelNoDocumentation);
+            _variableRequiredProperties.Invoke(
+                target => target.Add(Any<string>.Value, Any<SnapshotSchema>.Value),
+                [
+                    _method.Value(metadata.Name),
+                    variableMemberSchema
+                ]);
         }
     }
 }

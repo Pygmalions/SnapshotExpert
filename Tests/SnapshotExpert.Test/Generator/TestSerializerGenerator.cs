@@ -1,6 +1,6 @@
-﻿using SnapshotExpert.Framework;
-using SnapshotExpert.Framework.Values;
-using SnapshotExpert.Framework.Values.Primitives;
+﻿using SnapshotExpert.Data;
+using SnapshotExpert.Data.Values;
+using SnapshotExpert.Data.Values.Primitives;
 using SnapshotExpert.Generator;
 
 namespace SnapshotExpert.Test.Generator;
@@ -40,7 +40,7 @@ public class TestSerializerGenerator
     [Test]
     public void GenerateSerializer_ForClass()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.GetSerializer<StubBaseClass>();
         
@@ -50,7 +50,7 @@ public class TestSerializerGenerator
     [Test]
     public void GenerateSerializer_ForStruct()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.GetSerializer<StubBaseClass>();
         
@@ -60,7 +60,7 @@ public class TestSerializerGenerator
     [Test]
     public void SaveSnapshot_Class()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.RequireSerializer<StubBaseClass>();
         
@@ -91,7 +91,7 @@ public class TestSerializerGenerator
     [Test]
     public void LoadSnapshot_Class()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.RequireSerializer<StubBaseClass>();
         
@@ -122,7 +122,7 @@ public class TestSerializerGenerator
     [Test]
     public void SaveSnapshot_Struct()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.RequireSerializer<StubStruct>();
         
@@ -150,7 +150,7 @@ public class TestSerializerGenerator
     [Test]
     public void LoadSnapshot_Struct()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.RequireSerializer<StubStruct>();
 
@@ -177,7 +177,7 @@ public class TestSerializerGenerator
     [Test]
     public void SaveSnapshot_ChildClass()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.RequireSerializer<StubChildClass>();
         
@@ -214,7 +214,7 @@ public class TestSerializerGenerator
     [Test]
     public void LoadSnapshot_ChildClass()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.RequireSerializer<StubChildClass>();
         
@@ -266,7 +266,7 @@ public class TestSerializerGenerator
     [Test]
     public void SaveSnapshot_ClassWithTransientMembers()
     {
-        var context = new SnapshotContext();
+        var context = new SerializerContainer();
 
         var serializer = context.RequireSerializer<StubClassWithTransientMembers>();
         

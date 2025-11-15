@@ -1,5 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
-using SnapshotExpert.Framework;
+using SnapshotExpert.Data;
 
 namespace SnapshotExpert.Serializers;
 
@@ -35,6 +35,4 @@ public abstract class SnapshotSerializerValueTypeBase<TTarget>
         LoadSnapshot(ref typedTarget, snapshot, scope);
         target = typedTarget!;
     }
-    
-    
 }

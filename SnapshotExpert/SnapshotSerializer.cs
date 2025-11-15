@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using SnapshotExpert.Framework;
+using SnapshotExpert.Data;
 
 namespace SnapshotExpert;
 
-public abstract partial class SnapshotSerializer
+public abstract class SnapshotSerializer
 {
     /// <summary>
     /// Type of the target instance that this serializer can handle.
@@ -13,7 +13,7 @@ public abstract partial class SnapshotSerializer
     /// <summary>
     /// Context of this snapshot serializer.
     /// </summary>
-    public required SnapshotContext Context { get; init; }
+    public required SerializerContainer Context { get; init; }
 
     /// <summary>
     /// Schema of the snapshots that this serializer handles.

@@ -1,6 +1,6 @@
-﻿using SnapshotExpert.Framework;
-using SnapshotExpert.Framework.Schemas.Primitives;
-using SnapshotExpert.Framework.Values.Primitives;
+﻿using SnapshotExpert.Data;
+using SnapshotExpert.Data.Schemas.Primitives;
+using SnapshotExpert.Data.Values.Primitives;
 
 namespace SnapshotExpert.Serializers.Primitives;
 

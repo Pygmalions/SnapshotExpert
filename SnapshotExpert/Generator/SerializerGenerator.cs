@@ -2,10 +2,11 @@
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using EmitToolbox;
-using EmitToolbox.Extensions;
 using EmitToolbox.Framework;
+using EmitToolbox.Framework.Extensions;
+using EmitToolbox.Framework.Symbols;
+using EmitToolbox.Framework.Utilities;
 using InjectionExpert;
-using SnapshotExpert.Generator.Plugins;
 using SnapshotExpert.Serializers;
 using SnapshotExpert.Utilities;
 
@@ -13,7 +14,7 @@ namespace SnapshotExpert.Generator;
 
 public static partial class SerializerGenerator
 {
-    private static readonly DynamicResourceCacheForType<Type> Cache = new(
+    private static readonly DynamicResourceForType<Type> Cache = new(
         GenerateSerializerType, "GeneratedSerializers_");
 
     private static readonly CustomAttributeBuilder AttributeRequiredMember =
@@ -26,23 +27,12 @@ public static partial class SerializerGenerator
 
     private static Type GenerateSerializerType(DynamicAssembly assemblyContext, Type targetType)
     {
-        if (targetType.IsEnum)
-            return EnumSerializerGenerator.GenerateSerializerType(assemblyContext, targetType);
-        if (targetType.IsArray && targetType.GetArrayRank() > 1)
-            return MatrixSerializerGenerator.GenerateSerializerType(assemblyContext, targetType);
-        if (targetType.IsAssignableTo(typeof(ITuple)))
-        {
-            return targetType.IsValueType
-                ? ValueTupleSerializerGenerator.GenerateSerializerType(assemblyContext, targetType)
-                : TupleSerializerGenerator.GenerateSerializerType(assemblyContext, targetType);
-        }
-
         var baseType = (targetType.IsValueType
                 ? typeof(SnapshotSerializerValueTypeBase<>)
                 : typeof(SnapshotSerializerClassTypeBase<>))
             .MakeGenericType(targetType);
         var typeContext = assemblyContext.DefineClass(
-            "GeneratedSerializer_" + targetType, parent: baseType);
+            targetType.CreateDynamicFriendlyName("GeneratedSerializer_"), parent: baseType);
 
         var classContext = new ClassContext
         {
@@ -80,7 +70,7 @@ public static partial class SerializerGenerator
                 currentBaseType != typeof(object) &&
                 currentBaseType != typeof(ValueType))
                 IterateTypeHierarchy(currentBaseType);
-            
+
             // Filter fields to serialize.
             foreach (var field in currentType.GetFields(
                          BindingFlags.Instance | BindingFlags.DeclaredOnly |
@@ -107,28 +97,36 @@ public static partial class SerializerGenerator
 
     private static void ImplementInstantiateMethod(ClassContext context)
     {
-        var method = context.TypeContext.ActionBuilder.Override(
-            typeof(SnapshotSerializer<>)
-                .MakeGenericType(context.TargetType)
-                .GetMethod(nameof(SnapshotSerializer<>.NewInstance),
-                    [context.TargetType.MakeByRefType()])!);
+        var method =
+            context.TypeContext.MethodFactory.Instance.OverrideAction(
+                typeof(SnapshotSerializer<>)
+                    .MakeGenericType(context.TargetType)
+                    .GetMethod(nameof(SnapshotSerializer<>.NewInstance),
+                        [context.TargetType.MakeByRefType()])!);
 
-        var code = method.Code;
-
-        var variableThis = code.DeclareLocal(context.TargetType);
+        var argumentInstance = method.Argument(
+            0, context.TargetType.MakeByRefType());
 
         var constructor = context.TargetType.GetConstructor(
             BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
             Type.EmptyTypes);
 
-        if (constructor == null)
+        var variableInstance = method.Variable(context.TargetType);
+
+        if (constructor != null)
+        {
+            variableInstance.AssignNew(constructor);
+        }
+        else
         {
             // Create an uninitialized object of the target type.
             if (!context.TargetType.IsValueType)
             {
-                code.LoadTypeInfo(context.TargetType);
-                code.Call(typeof(RuntimeHelpers).GetMethod(nameof(RuntimeHelpers.GetUninitializedObject))!);
-                code.StoreLocal(variableThis);
+                method
+                    .Invoke(
+                        () => RuntimeHelpers.GetUninitializedObject(Any<Type>.Value),
+                        [method.Value(context.TargetType)])
+                    .ToSymbol(variableInstance);
             }
 
             // Invoke the nearest parameterless constructor.
@@ -141,27 +139,13 @@ public static partial class SerializerGenerator
                     Type.EmptyTypes);
                 if (ancestorConstructor == null)
                     continue;
-                if (context.TargetType.IsValueType)
-                    code.LoadLocalAddress(variableThis);
-                else
-                    code.LoadLocal(variableThis);
-                code.Call(ancestorConstructor);
+                variableInstance.Invoke(ancestorConstructor);
                 break;
             }
         }
-        else
-        {
-            code.NewObject(constructor);
-            code.StoreLocal(variableThis);
-        }
+        
+        argumentInstance.CopyValueFrom(variableInstance);
 
-        code.LoadArgument_1();
-        code.LoadLocal(variableThis);
-        if (context.TargetType.IsValueType)
-            code.Emit(OpCodes.Stobj, context.TargetType);
-        else
-            code.Emit(OpCodes.Stind_Ref);
-
-        code.MethodReturn();
+        method.Return();
     }
 }

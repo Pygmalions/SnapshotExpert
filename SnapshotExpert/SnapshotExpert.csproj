@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Title>Snapshot Expert</Title>
@@ -14,7 +14,7 @@
         <PackageTags>Serialization BSON JSON Automated-Serialization Serializer-Generator IL-Emitting</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <LangVersion>preview</LangVersion>
-        <Version>0.3.0-dev10090057</Version>
+        <Version>0.3.0-dev11160051</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -29,10 +29,9 @@
 
     <ItemGroup>
         <PackageReference Include="DocumentationParser" Version="0.1.0"/>
-        <PackageReference Include="EmitToolbox" Version="0.3.0-dev09102111" />
-        <PackageReference Include="InjectionExpert" Version="0.3.0-dev09102118" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8"/>
-        <PackageReference Include="MongoDB.Bson" Version="3.4.3"/>
+        <PackageReference Include="EmitToolbox" Version="0.3.0-dev11160018" />
+        <PackageReference Include="InjectionExpert" Version="0.3.0-dev11160049" />
+        <PackageReference Include="MongoDB.Bson" Version="3.5.0" />
     </ItemGroup>
 
     <Target Name="InjectPackageReleaseNotesFromFile" BeforeTargets="GenerateNuspec" Condition="Exists('RELEASE_NOTE.txt')">

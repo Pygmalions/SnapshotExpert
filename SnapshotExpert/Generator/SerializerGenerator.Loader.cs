@@ -1,9 +1,10 @@
 using System.Reflection;
-using System.Reflection.Emit;
-using EmitToolbox.Extensions;
 using EmitToolbox.Framework;
-using SnapshotExpert.Framework;
-using SnapshotExpert.Framework.Values;
+using EmitToolbox.Framework.Extensions;
+using EmitToolbox.Framework.Symbols;
+using EmitToolbox.Framework.Utilities;
+using SnapshotExpert.Data;
+using SnapshotExpert.Data.Values;
 using SnapshotExpert.Serializers;
 
 namespace SnapshotExpert.Generator;
@@ -14,23 +15,27 @@ public partial class SerializerGenerator
     {
         private ClassContext _context = null!;
 
-        private InstanceDynamicAction _method = null!;
+        private DynamicMethod<Action> _method = null!;
 
         /// <summary>
         /// Object value of the snapshot node.
         /// </summary>
-        private LocalBuilder _variableObjectValue = null!;
+        private VariableSymbol<ObjectValue> _variableObjectValue = null!;
 
         /// <summary>
         /// Sub node for members.
         /// </summary>
-        private LocalBuilder _variableMemberNode = null!;
+        private VariableSymbol<SnapshotNode> _variableMemberNode = null!;
+
+        private ArgumentSymbol _argumentTarget = null!;
+
+        private ArgumentSymbol<SnapshotReadingScope> _argumentScope = null!;
 
         public void Initialize(ClassContext context)
         {
             _context = context;
-            _method = context.TypeContext.ActionBuilder
-                .Override(context.SerializerBaseType.GetMethod(
+            _method = context.TypeContext.MethodFactory.Instance
+                .OverrideAction(context.SerializerBaseType.GetMethod(
                     !context.TargetType.IsValueType
                         ? "OnLoadSnapshot"
                         : nameof(SnapshotSerializerValueTypeBase<>.LoadSnapshot),
@@ -40,82 +45,56 @@ public partial class SerializerGenerator
                         typeof(SnapshotNode),
                         typeof(SnapshotReadingScope)
                     ])!);
+            _argumentTarget =
+                _method.Argument(0, context.TargetType.MakeByRefType());
+            var argumentNode =
+                _method.Argument<SnapshotNode>(1);
+            _argumentScope =
+                _method.Argument<SnapshotReadingScope>(2);
 
-            _variableObjectValue = _method.Code.DeclareLocal(typeof(ObjectValue));
-            _method.Code.LoadArgument_2();
-            _method.Code.Call(
-                typeof(SnapshotNodeExtensions)
-                    .GetMethod(nameof(SnapshotNodeExtensions.RequireValue))!
-                    .MakeGenericMethod(typeof(ObjectValue)));
-            _method.Code.StoreLocal(_variableObjectValue);
+            _variableObjectValue = _method.Variable<ObjectValue>();
+            _variableObjectValue.AssignContent(
+                _method.Invoke(
+                    () => Any<SnapshotNode>.Value.RequireValue<ObjectValue>(),
+                    [argumentNode])
+            );
 
-            _variableMemberNode = _method.Code.DeclareLocal(typeof(SnapshotNode));
+            _variableMemberNode = _method.Variable<SnapshotNode>();
         }
 
         public void Complete()
         {
-            _method.Code.MethodReturn();
+            _method.Return();
         }
 
         public void Generate(FieldInfo field, MemberInfo metadata)
         {
-            var code = _method.Code;
+            var conditionFoundNode = _variableObjectValue
+                .GetPropertyValue(target => target.Nodes)
+                .Invoke<bool>(typeof(IReadOnlyDictionary<string, SnapshotNode>)
+                        .GetMethod(nameof(IReadOnlyDictionary<,>.TryGetValue))!,
+                    [_method.Value(metadata.Name), _variableMemberNode]);
 
-            // Locate the data entry for this member.
-            // Currently, generated snapshot loader can tolerate missing data entries for members.
-            var labelEnd = code.DefineLabel();
-            EmitTryLocateMemberNode(metadata.Name);
-            code.GotoIfFalse(labelEnd);
+            using (_method.If(conditionFoundNode))
+            {
+                var fieldSerializer = _context.GetSerializerField(field.FieldType)
+                    .SymbolOf(_method, _method.This());
+                var fieldMember = _argumentTarget.Field(field);
 
-            _context.EmitLoadSerializer(code, field.FieldType);
-
-            // Load target member address.
-            _context.EmitLoadTarget(code);
-            code.Emit(OpCodes.Ldflda, field);
-
-            // Load snapshot node.
-            code.LoadLocal(_variableMemberNode);
-
-            // Load snapshot reading cope.
-            code.LoadArgument_3();
-
-            code.CallVirtual(typeof(SnapshotSerializer<>)
-                .MakeGenericType(field.FieldType)
-                .GetMethod(nameof(SnapshotSerializer<>.LoadSnapshot),
-                [
-                    field.FieldType.MakeByRefType(),
-                    typeof(SnapshotNode),
-                    typeof(SnapshotReadingScope)
-                ])!);
-
-            code.MarkLabel(labelEnd);
-        }
-
-        private void EmitTryLocateMemberNode(string name)
-        {
-            var code = _method.Code;
-
-            code.LoadNull();
-            code.StoreLocal(_variableMemberNode);
-
-            code.LoadLocal(_variableObjectValue);
-            code.LoadProperty(typeof(ObjectValue).GetProperty(nameof(ObjectValue.Nodes))!);
-            code.LoadLiteral(name);
-            code.LoadLocalAddress(_variableMemberNode);
-            code.Emit(OpCodes.Callvirt,
-                typeof(IReadOnlyDictionary<string, SnapshotNode>)
-                    .GetMethod(nameof(IReadOnlyDictionary<,>.TryGetValue))!);
-        }
-
-        private void EmitLocateMemberNode(string name)
-        {
-            var code = _method.Code;
-
-            code.LoadLocal(_variableObjectValue);
-            code.LoadLiteral(name);
-            code.CallVirtual(
-                typeof(ObjectValueExtensions).GetMethod(nameof(ObjectValueExtensions.RequireNode))!);
-            code.StoreLocal(_variableMemberNode);
+                fieldSerializer.Invoke(typeof(SnapshotSerializer<>)
+                        .MakeGenericType(field.FieldType)
+                        .GetMethod(nameof(SnapshotSerializer<>.LoadSnapshot),
+                        [
+                            field.FieldType.MakeByRefType(),
+                            typeof(SnapshotNode),
+                            typeof(SnapshotReadingScope)
+                        ])!,
+                    [
+                        fieldMember,
+                        _variableMemberNode,
+                        _argumentScope
+                    ]);
+            }
         }
     }
 }

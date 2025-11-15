@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using SnapshotExpert.Framework;
-using SnapshotExpert.Framework.Values;
-using SnapshotExpert.Framework.Values.Primitives;
+using SnapshotExpert.Data;
+using SnapshotExpert.Data.Values;
+using SnapshotExpert.Data.Values.Primitives;
 
 namespace SnapshotExpert.Serializers;
 
