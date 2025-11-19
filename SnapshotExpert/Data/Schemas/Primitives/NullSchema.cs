@@ -3,6 +3,9 @@ using SnapshotExpert.Data.Values.Primitives;
 
 namespace SnapshotExpert.Data.Schemas.Primitives;
 
+/// <summary>
+/// This schema only accepts null.
+/// </summary>
 public record NullSchema : PrimitiveSchema
 {
     public NullSchema()

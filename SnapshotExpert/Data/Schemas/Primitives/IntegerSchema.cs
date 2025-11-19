@@ -3,7 +3,7 @@ using SnapshotExpert.Data.Values.Primitives;
 
 namespace SnapshotExpert.Data.Schemas.Primitives;
 
-public record class IntegerSchema() : PrimitiveSchema(JsonValueType.Integer)
+public record IntegerSchema() : PrimitiveSchema(JsonValueType.Integer)
 {
     public long? Minimum { get; init; } = null;
 

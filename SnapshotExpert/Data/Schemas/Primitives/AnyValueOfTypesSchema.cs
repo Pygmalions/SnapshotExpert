@@ -3,9 +3,12 @@ using SnapshotExpert.Data.Values.Primitives;
 
 namespace SnapshotExpert.Data.Schemas.Primitives;
 
-public record TypesSchema : PrimitiveSchema
+/// <summary>
+/// This schema accepts any value of the specified types.
+/// </summary>
+public record AnyValueOfTypesSchema : PrimitiveSchema
 {
-    public TypesSchema(params Span<JsonValueType> types) : base(types)
+    public AnyValueOfTypesSchema(params Span<JsonValueType> types) : base(types)
     {
     }
     

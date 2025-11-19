@@ -1,4 +1,3 @@
-using SnapshotExpert.Data.Schemas.Primitives;
 using SnapshotExpert.Data.Values;
 
 namespace SnapshotExpert.Data.Schemas.Composite;

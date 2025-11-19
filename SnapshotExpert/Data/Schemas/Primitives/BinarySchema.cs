@@ -15,11 +15,11 @@ public record BinarySchema : SnapshotSchema
             {
                 RequiredProperties = new OrderedDictionary<string, SnapshotSchema>
                 {
-                    ["base64"] = new TypesSchema(JsonValueType.String)
+                    ["base64"] = new AnyValueOfTypesSchema(JsonValueType.String)
                     {
                         Description = "The base64-encoded binary data."
                     },
-                    ["subType"] = new TypesSchema(JsonValueType.String, JsonValueType.Integer)
+                    ["subType"] = new AnyValueOfTypesSchema(JsonValueType.String, JsonValueType.Integer)
                     {
                         Description = GenerateSubTypeDescription()
                     }

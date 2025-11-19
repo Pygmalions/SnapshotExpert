@@ -22,22 +22,6 @@ public class SnapshotReadingScope
     {
         Root = root;
     }
-
-    /// <summary>
-    /// Create a new reading scope with the specified root snapshot node.
-    /// </summary>
-    /// <param name="root">
-    /// The node that this value is bound to will be considered as the root node for this scope,
-    /// if the value is not bound to any node, a new root node will be created to hold this value.
-    /// </param>
-    public SnapshotReadingScope(SnapshotValue root)
-    {
-        var node = root.Node ?? new SnapshotNode
-        {
-            Value = root
-        };
-        Root = node;
-    }
     
     /// <summary>
     /// Search for the referenced object from a reference value.

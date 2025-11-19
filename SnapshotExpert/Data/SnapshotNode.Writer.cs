@@ -16,7 +16,7 @@ public partial class SnapshotNode
     /// Throw if no value is bound to this node, a.k.a. <see cref="Value"/> is null.
     /// </exception>
     /// <exception cref="Exception">
-    /// Throw if the value contains unsupported part.
+    /// Throw if the value contains an unsupported part.
     /// </exception>
     public void Dump(IBsonWriter writer)
     {

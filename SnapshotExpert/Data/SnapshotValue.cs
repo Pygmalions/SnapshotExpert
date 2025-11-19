@@ -9,15 +9,17 @@ public abstract partial class SnapshotValue
     
     /// <summary>
     /// The node that this value is bound to.
+    /// By assigning this value to the <see cref="SnapshotNode.Value"/> property,
+    /// the value is bound to the node.
     /// </summary>
-    public SnapshotNode? Node { get; internal set; }
+    public SnapshotNode? DeclaringNode { get; internal set; }
 
     /// <summary>
     /// Compare the content of this value with another value.
     /// </summary>
     /// <param name="value">Value to compare to.</param>
     /// <returns>
-    /// True if the content of the two values are equal; otherwise false.
+    /// True if the contents of the two values are equal; otherwise false.
     /// </returns>
     public abstract bool ContentEquals(SnapshotValue? value);
 

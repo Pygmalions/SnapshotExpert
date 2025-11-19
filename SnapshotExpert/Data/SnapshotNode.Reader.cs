@@ -16,8 +16,8 @@ public partial class SnapshotNode
     /// If it is null, a root node will be created and used.
     /// </param>
     /// <param name="root">
-    /// Root node of this snapshot node tree, used to resolve by-path references.
-    /// If it is null, then current node will be used as the root node.
+    /// The root node of this snapshot node tree, used to resolve by-path references.
+    /// If it is null, then the current node will be used as the root node.
     /// </param>
     /// <returns>
     /// Specified node, or a new root node if the specified node is null.

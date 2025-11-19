@@ -9,7 +9,7 @@ public partial class SnapshotNode
     /// <summary>
     /// Value that declares this node.
     /// </summary>
-    private SnapshotValue? Slot { get; set; }
+    private SnapshotValue? DeclaringValue { get; set; }
     
     /// <summary>
     /// Human-readable string for this node to display in the debugger.
@@ -19,11 +19,11 @@ public partial class SnapshotNode
     /// <summary>
     /// Instantiate a snapshot and mount it to the specified slot.
     /// </summary>
-    /// <param name="slot">Slot for this node to mount under.</param>
+    /// <param name="owner">Value that declares this node.</param>
     /// <param name="name">Name of this slot.</param>
-    internal SnapshotNode(SnapshotValue? slot, string name)
+    internal SnapshotNode(SnapshotValue? owner, string name)
     {
-        Slot = slot;
+        DeclaringValue = owner;
         Name = name;
     }
 
@@ -42,7 +42,7 @@ public partial class SnapshotNode
     /// </summary>
     internal void Detach()
     {
-        Slot = null;
+        DeclaringValue = null;
         Name = "#";
     }
 
@@ -63,10 +63,10 @@ public partial class SnapshotNode
     /// <summary>
     /// Parent node of this node.
     /// </summary>
-    public SnapshotNode? Parent => Slot?.Node;
+    public SnapshotNode? Parent => DeclaringValue?.DeclaringNode;
 
     /// <summary>
-    /// Children node
+    /// Children node of this node.
     /// </summary>
     public IReadOnlyCollection<SnapshotNode> Children => 
         Value as IReadOnlyCollection<SnapshotNode> ?? [];
@@ -96,9 +96,9 @@ public partial class SnapshotNode
         get;
         set
         {
-            field?.Node = null;
+            field?.DeclaringNode = null;
             field = value;
-            value?.Node = this;
+            value?.DeclaringNode = this;
         }
     }
 
