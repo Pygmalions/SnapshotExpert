@@ -6,6 +6,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotExpert.Test", "Test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D463BEA2-EE31-4ADA-B19F-2D5652FB0F6B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotExpert.Remoting", "SnapshotExpert.Remoting\SnapshotExpert.Remoting.csproj", "{C0DDC896-313A-4B51-A1B5-F466C4E3E4F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotExpert.Remoting.Test", "Tests\SnapshotExpert.Remoting.Test\SnapshotExpert.Remoting.Test.csproj", "{5E8A11DC-6CC3-4EA7-B665-8FDFC39B653A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,17 @@ Global
 		{B58548BB-D1A5-4EF2-BB99-6B75DA8E654A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B58548BB-D1A5-4EF2-BB99-6B75DA8E654A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B58548BB-D1A5-4EF2-BB99-6B75DA8E654A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0DDC896-313A-4B51-A1B5-F466C4E3E4F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0DDC896-313A-4B51-A1B5-F466C4E3E4F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0DDC896-313A-4B51-A1B5-F466C4E3E4F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0DDC896-313A-4B51-A1B5-F466C4E3E4F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E8A11DC-6CC3-4EA7-B665-8FDFC39B653A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E8A11DC-6CC3-4EA7-B665-8FDFC39B653A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E8A11DC-6CC3-4EA7-B665-8FDFC39B653A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E8A11DC-6CC3-4EA7-B665-8FDFC39B653A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B58548BB-D1A5-4EF2-BB99-6B75DA8E654A} = {D463BEA2-EE31-4ADA-B19F-2D5652FB0F6B}
+		{5E8A11DC-6CC3-4EA7-B665-8FDFC39B653A} = {D463BEA2-EE31-4ADA-B19F-2D5652FB0F6B}
 	EndGlobalSection
 EndGlobal
