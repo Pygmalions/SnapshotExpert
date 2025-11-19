@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
-        <Version>0.3.0-dev11192239</Version>
+        <Version>0.3.0-dev11192245</Version>
         <Title>SnapshotExpert Remoting</Title>
         <Authors>Pygmalions</Authors>
         <Description>This package provides extensions that enable using SnapshotExpert for remote procedure calls (RPC). It provides generators for clients (encode method-calls into SnapshotValue and proxy virtual and non-virtual methods) and servers (decode SnapshotValue into arguments and dispatch them to the corresponding method). This pacakge also includes serializers for CancellationToken, Task&lt;T&gt;, ValueTask&lt;T&gt;, etc.</Description>

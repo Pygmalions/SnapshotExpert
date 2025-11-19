@@ -84,7 +84,7 @@ public abstract class SnapshotSerializerClassTypeBase<TTarget>
                 // Store the actual type in the snapshot node.
                 snapshot.Type = target.GetType();
                 // Redirect the serialization to the serializer for the actual type.
-                Context.RequireSerializer(actualType).SaveSnapshot(target, snapshot, scope);
+                Context.RequireSerializer(actualType).SaveSnapshotAsObject(target, snapshot, scope);
                 return;
             }
         }
@@ -154,7 +154,7 @@ public abstract class SnapshotSerializerClassTypeBase<TTarget>
                 {
                     // Redirect the deserialization to the serializer for the actual type.
                     object untypedTarget = target;
-                    Context.RequireSerializer(snapshot.Type).LoadSnapshot(ref untypedTarget, snapshot, scope);
+                    Context.RequireSerializer(snapshot.Type).LoadSnapshotAsObject(ref untypedTarget, snapshot, scope);
                     break;
                 }
 

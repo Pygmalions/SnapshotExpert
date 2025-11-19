@@ -18,7 +18,7 @@ public class SerializerRedirector<TTarget> : SnapshotSerializer<TTarget> where T
         if (snapshot.Type == null)
             throw new Exception($"Failed to load snapshot for {TargetType}: missing necessary '$type' field.");
         object untypedTarget = target;
-        Context.RequireSerializer(snapshot.Type).LoadSnapshot(ref untypedTarget, snapshot, scope);
+        Context.RequireSerializer(snapshot.Type).LoadSnapshotAsObject(ref untypedTarget, snapshot, scope);
         target = (TTarget)untypedTarget;
     }
 
@@ -26,11 +26,11 @@ public class SerializerRedirector<TTarget> : SnapshotSerializer<TTarget> where T
     {
         var targetType = target.GetType();
         snapshot.Type = targetType;
-        Context.RequireSerializer(targetType).SaveSnapshot(target, snapshot, scope);
+        Context.RequireSerializer(targetType).SaveSnapshotAsObject(target, snapshot, scope);
     }
 
     protected override SnapshotSchema GenerateSchema()
     {
-        return new ObjectSchema();
+        return new EmptySchema();
     }
 }

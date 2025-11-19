@@ -27,7 +27,7 @@ public abstract class SnapshotSerializer
     /// It is not likely to be fully initialized and ready to use.
     /// </summary>
     /// <param name="instance">Instantiated instance.</param>
-    public abstract void NewInstance(out object instance);
+    public abstract void NewInstanceAsObject(out object instance);
 
     /// <summary>
     /// Save the snapshot for the target instance.
@@ -38,7 +38,7 @@ public abstract class SnapshotSerializer
     /// <param name="snapshot">Root node to write snapshot into.</param>
     /// <param name="scope">Scope for this snapshot writing operation.</param>
     /// <returns>Snapshot for the target instance.</returns>
-    public abstract void SaveSnapshot(in object target, SnapshotNode snapshot, SnapshotWritingScope scope);
+    public abstract void SaveSnapshotAsObject(in object target, SnapshotNode snapshot, SnapshotWritingScope scope);
 
     /// <summary>
     /// Load the snapshot into the target instance.
@@ -48,7 +48,7 @@ public abstract class SnapshotSerializer
     /// </param>
     /// <param name="snapshot">Root node to read snapshot from.</param>
     /// <param name="scope">Scope for this snapshot reading operation.</param>
-    public abstract void LoadSnapshot(ref object target, SnapshotNode snapshot, SnapshotReadingScope scope);
+    public abstract void LoadSnapshotAsObject(ref object target, SnapshotNode snapshot, SnapshotReadingScope scope);
 
     /// <summary>
     /// Generate the schema of the snapshots that this serializer handles.
@@ -111,13 +111,13 @@ public abstract class SnapshotSerializer<TTarget> : SnapshotSerializer
         LoadSnapshot(ref target, snapshot, scope);
     }
 
-    public override void NewInstance(out object instance)
+    public override void NewInstanceAsObject(out object instance)
     {
         NewInstance(out var typedInstance);
         instance = typedInstance!;
     }
 
-    public override void SaveSnapshot(in object target, SnapshotNode snapshot, SnapshotWritingScope scope)
+    public override void SaveSnapshotAsObject(in object target, SnapshotNode snapshot, SnapshotWritingScope scope)
     {
         if (target is not TTarget typedTarget)
             throw new InvalidOperationException(
@@ -126,7 +126,7 @@ public abstract class SnapshotSerializer<TTarget> : SnapshotSerializer
         SaveSnapshot(in typedTarget, snapshot, scope);
     }
 
-    public override void LoadSnapshot(ref object target, SnapshotNode snapshot, SnapshotReadingScope scope)
+    public override void LoadSnapshotAsObject(ref object target, SnapshotNode snapshot, SnapshotReadingScope scope)
     {
         if (target is not TTarget typedTarget)
             throw new InvalidOperationException(

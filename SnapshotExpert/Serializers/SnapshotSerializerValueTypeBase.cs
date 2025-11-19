@@ -8,9 +8,9 @@ public abstract class SnapshotSerializerValueTypeBase<TTarget>
 {
     public override void NewInstance(out TTarget instance) => instance = default;
 
-    public override void NewInstance(out object instance) => instance = default(TTarget);
+    public override void NewInstanceAsObject(out object instance) => instance = default(TTarget);
 
-    public override void SaveSnapshot(in object target, SnapshotNode snapshot, SnapshotWritingScope scope)
+    public override void SaveSnapshotAsObject(in object target, SnapshotNode snapshot, SnapshotWritingScope scope)
     {
         if (target.GetType() != TargetType)
             throw new InvalidOperationException(
@@ -19,7 +19,7 @@ public abstract class SnapshotSerializerValueTypeBase<TTarget>
         SaveSnapshot(Unsafe.Unbox<TTarget>(target), snapshot, scope);
     }
 
-    public override void LoadSnapshot(ref object target, SnapshotNode snapshot, SnapshotReadingScope scope)
+    public override void LoadSnapshotAsObject(ref object target, SnapshotNode snapshot, SnapshotReadingScope scope)
     {
         if (target.GetType() != TargetType)
             throw new InvalidOperationException(
