@@ -2,10 +2,9 @@
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using EmitToolbox;
-using EmitToolbox.Framework;
-using EmitToolbox.Framework.Extensions;
-using EmitToolbox.Framework.Symbols;
-using EmitToolbox.Framework.Utilities;
+using EmitToolbox.Extensions;
+using EmitToolbox.Symbols;
+using EmitToolbox.Utilities;
 using SnapshotExpert.Data;
 using SnapshotExpert.Data.Schemas.Primitives;
 using SnapshotExpert.Data.Values;

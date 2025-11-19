@@ -189,4 +189,6 @@ public class SerializerContainer : ISerializerContainer
         _container.InvalidateCache();
         _resolver.InvalidateCache();
     }
+    
+    public IInjectionProvider AsInjections() => _injector;
 }

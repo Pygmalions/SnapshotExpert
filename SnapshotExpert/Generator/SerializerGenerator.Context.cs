@@ -1,11 +1,23 @@
 using System.Reflection;
-using EmitToolbox.Framework;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using EmitToolbox;
+using InjectionExpert;
 using SnapshotExpert.Utilities;
 
 namespace SnapshotExpert.Generator;
 
 public partial class SerializerGenerator
 {
+    private static readonly CustomAttributeBuilder AttributeRequiredMember =
+        new(typeof(RequiredMemberAttribute).GetConstructor(Type.EmptyTypes)!, []);
+
+    private static readonly CustomAttributeBuilder AttributeInjectionMember =
+        new(typeof(InjectionAttribute).GetConstructor([typeof(bool)])!, [true]);
+
+    private static readonly CustomAttributeBuilder AttributeSerializerDependency =
+        SerializerDependencyAttribute.CreateBuilder(typeof(SerializerGenerator).FullName!);
+    
     private class ClassContext
     {
         private readonly Dictionary<Type, DynamicField> _serializers = new();
@@ -25,6 +37,8 @@ public partial class SerializerGenerator
                 typeof(SnapshotSerializer<>).MakeGenericType(type)
             );
             field.MarkAttribute(AttributeRequiredMember);
+            field.MarkAttribute(AttributeInjectionMember);
+            field.MarkAttribute(AttributeSerializerDependency);
             _serializers[type] = field;
             return field;
         }

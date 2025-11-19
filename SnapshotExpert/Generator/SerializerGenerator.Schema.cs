@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text;
 using DocumentationParser;
-using EmitToolbox.Framework;
-using EmitToolbox.Framework.Extensions;
-using EmitToolbox.Framework.Symbols;
-using EmitToolbox.Framework.Utilities;
+using EmitToolbox;
+using EmitToolbox.Extensions;
+using EmitToolbox.Symbols;
+using EmitToolbox.Utilities;
 using SnapshotExpert.Data;
 using SnapshotExpert.Data.Schemas.Primitives;
 
@@ -59,12 +59,13 @@ public partial class SerializerGenerator
             _method = _context.TypeContext.MethodFactory.Instance
                 .OverrideFunctor<SnapshotSchema>(typeof(SnapshotSerializer).GetMethod("GenerateSchema",
                     BindingFlags.NonPublic | BindingFlags.Instance)!);
-            
-            _fieldDocumentation = context.TypeContext.FieldFactory
+
+            var fieldDocumentation = context.TypeContext.FieldFactory
                 .DefineInstance(
-                    "Documentation", typeof(IDocumentationProvider))
-                .MarkAttribute(AttributeInjectionMember)
-                .SymbolOf<IDocumentationProvider?>(_method, _method.This());
+                    "Documentation", typeof(IDocumentationProvider));
+            fieldDocumentation.MarkAttribute(AttributeInjectionMember);
+            
+            _fieldDocumentation = fieldDocumentation.SymbolOf<IDocumentationProvider?>(_method, _method.This());
             
             _variableRequiredProperties = _method.New<OrderedDictionary<string, SnapshotSchema>>();
         }

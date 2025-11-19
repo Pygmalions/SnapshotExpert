@@ -80,6 +80,8 @@ internal static class SerializerContainerExtensionsForPrimitives
         container.WithSerializer<DateTimeOffset, DateTimeOffsetSnapshotSerializer>();
         container.WithSerializer<TimeSpan, TimeSpanSnapshotSerializer>();
 
+        container.WithSerializer<object, SerializerRedirector<object>>();
+
         container.Factories.Add(CreateSerializerForPrimitive);
 
         return container;

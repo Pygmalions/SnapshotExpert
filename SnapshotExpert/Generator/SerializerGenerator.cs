@@ -1,12 +1,9 @@
 ﻿using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using EmitToolbox;
-using EmitToolbox.Framework;
-using EmitToolbox.Framework.Extensions;
-using EmitToolbox.Framework.Symbols;
-using EmitToolbox.Framework.Utilities;
-using InjectionExpert;
+using EmitToolbox.Extensions;
+using EmitToolbox.Symbols;
+using EmitToolbox.Utilities;
 using SnapshotExpert.Serializers;
 using SnapshotExpert.Utilities;
 
@@ -16,12 +13,6 @@ public static partial class SerializerGenerator
 {
     private static readonly DynamicResourceForType<Type> Cache = new(
         GenerateSerializerType, "GeneratedSerializers_");
-
-    private static readonly CustomAttributeBuilder AttributeRequiredMember =
-        new(typeof(RequiredMemberAttribute).GetConstructor(Type.EmptyTypes)!, []);
-
-    private static readonly CustomAttributeBuilder AttributeInjectionMember =
-        new(typeof(InjectionAttribute).GetConstructor([typeof(bool)])!, [true]);
 
     public static Type For(Type type) => Cache[type];
 

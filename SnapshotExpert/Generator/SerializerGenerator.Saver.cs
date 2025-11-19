@@ -1,8 +1,8 @@
 using System.Reflection;
-using EmitToolbox.Framework;
-using EmitToolbox.Framework.Extensions;
-using EmitToolbox.Framework.Symbols;
-using EmitToolbox.Framework.Utilities;
+using EmitToolbox;
+using EmitToolbox.Extensions;
+using EmitToolbox.Symbols;
+using EmitToolbox.Utilities;
 using SnapshotExpert.Data;
 using SnapshotExpert.Data.Values;
 using SnapshotExpert.Serializers;
