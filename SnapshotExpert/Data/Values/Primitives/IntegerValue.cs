@@ -3,12 +3,12 @@
 public class Integer32Value(int value = 0) : PrimitiveValue,
     INumberValue
 {
-    internal override string DebuggerString => $"(Integer32) {Value}";
+    public override string DebuggerString => $"(Integer32) {Value}";
 
     public int Value { get; set; } = value;
 
     public override bool ContentEquals(SnapshotValue? value)
-        => value is IInteger32Number other && Value == other.Value;
+        => value is IInteger32Value other && Value == other.Value;
 
     public override int GetContentHashCode() => Value.GetHashCode();
 
@@ -16,19 +16,19 @@ public class Integer32Value(int value = 0) : PrimitiveValue,
 
     public static implicit operator Integer32Value(int value) => new(value);
 
-    long IInteger64Number.Value
+    long IInteger64Value.Value
     {
         get => Value;
         set => Value = (int)value;
     }
 
-    double IFloat64Number.Value
+    double IFloat64Value.Value
     {
         get => Value;
         set => Value = (int)value;
     }
 
-    decimal IDecimalNumber.Value
+    decimal IDecimalValue.Value
     {
         get => Value;
         set => Value = decimal.ToInt32(value);
@@ -37,12 +37,12 @@ public class Integer32Value(int value = 0) : PrimitiveValue,
 
 public class Integer64Value(long value = 0) : PrimitiveValue, INumberValue
 {
-    internal override string DebuggerString => $"(Integer64) {Value}";
+    public override string DebuggerString => $"(Integer64) {Value}";
 
     public long Value { get; set; } = value;
 
     public override bool ContentEquals(SnapshotValue? value)
-        => value is IInteger64Number other && Value == other.Value;
+        => value is IInteger64Value other && Value == other.Value;
 
     public override int GetContentHashCode() => Value.GetHashCode();
 
@@ -50,19 +50,19 @@ public class Integer64Value(long value = 0) : PrimitiveValue, INumberValue
 
     public static implicit operator Integer64Value(long value) => new(value);
     
-    int IInteger32Number.Value
+    int IInteger32Value.Value
     {
         get => (int)Value;
         set => Value = value;
     }
 
-    double IFloat64Number.Value
+    double IFloat64Value.Value
     {
         get => Value;
         set => Value = (long)value;
     }
 
-    decimal IDecimalNumber.Value
+    decimal IDecimalValue.Value
     {
         get => Value;
         set => Value = decimal.ToInt64(value);

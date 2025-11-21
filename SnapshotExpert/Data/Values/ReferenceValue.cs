@@ -6,8 +6,6 @@
 public abstract class ReferenceValue : SnapshotValue
 {
     internal ReferenceValue() {}
-    
-    internal override SnapshotNode? this[string name] => null;
 }
 
 /// <summary>
@@ -16,7 +14,7 @@ public abstract class ReferenceValue : SnapshotValue
 /// <param name="reference">Referenced node in the same snapshot.</param>
 public class InternalReferenceValue(SnapshotNode? reference = null) : ReferenceValue
 {
-    internal override string DebuggerString => $"(InternalReference) '{Reference?.Path ?? "null"}'";
+    public override string DebuggerString => $"(InternalReference) '{Reference?.Path ?? "null"}'";
     
     public SnapshotNode? Reference { get; set; } = reference;
 
@@ -40,7 +38,7 @@ public class ExternalReferenceValue(string? identifier = null) : ReferenceValue
 {
     private static int DefaultContentHashCode { get; } = typeof(ExternalReferenceValue).GetHashCode();
 
-    internal override string DebuggerString => $"(ExternalReference) '{Identifier ?? "null"}'";
+    public override string DebuggerString => $"(ExternalReference) '{Identifier ?? "null"}'";
 
     public string? Identifier { get; set; } = identifier;
 

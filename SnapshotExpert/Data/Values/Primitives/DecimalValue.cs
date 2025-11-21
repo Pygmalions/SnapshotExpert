@@ -2,12 +2,12 @@
 
 public class DecimalValue(decimal value = 0) : PrimitiveValue, INumberValue
 {
-    internal override string DebuggerString => $"(Decimal) {Value}";
+    public override string DebuggerString => $"(Decimal) {Value}";
     
     public decimal Value { get; set; } = value;
     
     public override bool ContentEquals(SnapshotValue? value)
-        =>  value is IDecimalNumber other && Value == other.Value;
+        =>  value is IDecimalValue other && Value == other.Value;
 
     public override int GetContentHashCode() => Value.GetHashCode();
     
@@ -15,19 +15,19 @@ public class DecimalValue(decimal value = 0) : PrimitiveValue, INumberValue
     
     public static implicit operator DecimalValue(decimal value) => new(value);
 
-    int IInteger32Number.Value
+    int IInteger32Value.Value
     {
         get => decimal.ToInt32(Value);
         set => Value = value;
     }
     
-    long IInteger64Number.Value
+    long IInteger64Value.Value
     {
         get => decimal.ToInt64(Value);
         set => Value = value;
     }
 
-    double IFloat64Number.Value
+    double IFloat64Value.Value
     {
         get => decimal.ToDouble(Value);
         set => Value = (decimal)value;

@@ -8,7 +8,7 @@ public record NotSchema : SnapshotSchema
 
     protected override void OnGenerate(ObjectValue schema)
     {
-        Schema.Generate(schema.CreateNode("not").AssignObject());
+        Schema.Generate(schema.CreateNode("not").AssignValue(new ObjectValue()));
     }
 
     protected override bool OnValidate(SnapshotNode node) 

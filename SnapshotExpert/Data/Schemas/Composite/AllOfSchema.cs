@@ -8,10 +8,10 @@ public record AllOfSchema : SnapshotSchema
     
     protected override void OnGenerate(ObjectValue schema)
     {
-        var array = schema.CreateNode("allOf").AssignArray();
+        var array = schema.CreateNode("allOf").AssignValue(new ArrayValue());
         foreach (var model in Schemas)
         {
-            model.Generate(array.CreateNode().AssignObject());
+            model.Generate(array.CreateNode().AssignValue(new ObjectValue()));
         }
     }
 

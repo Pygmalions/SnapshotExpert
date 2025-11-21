@@ -1,21 +1,12 @@
-﻿using System.Diagnostics;
+﻿using System.Collections;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SnapshotExpert.Data;
 
-[DebuggerDisplay("{DebuggerString,nq}")]
-public partial class SnapshotNode
+[DebuggerDisplay("{DebuggerString,nq}", Name = "{Name,nq}")]
+public partial class SnapshotNode : IEnumerable<SnapshotNode>, ISnapshotConvertible
 {
-    /// <summary>
-    /// Value that declares this node.
-    /// </summary>
-    private SnapshotValue? DeclaringValue { get; set; }
-    
-    /// <summary>
-    /// Human-readable string for this node to display in the debugger.
-    /// </summary>
-    internal string DebuggerString => $"\"{Name}\" = {Value?.DebuggerString ?? "[Empty]"}";
-    
     /// <summary>
     /// Instantiate a snapshot and mount it to the specified slot.
     /// </summary>
@@ -36,15 +27,14 @@ public partial class SnapshotNode
     }
 
     /// <summary>
-    /// Detach this node from its slot.
-    /// After detachment, the node becomes a root node with name '#'.
-    /// This method will also invalidate the cached path of this node and its children.
+    /// Value that declares this node.
     /// </summary>
-    internal void Detach()
-    {
-        DeclaringValue = null;
-        Name = "#";
-    }
+    private SnapshotValue? DeclaringValue { get; set; }
+
+    /// <summary>
+    /// Human-readable string for this node to display in the debugger.
+    /// </summary>
+    internal string DebuggerString => Value?.DebuggerString ?? "[Empty]";
 
     /// <summary>
     /// Name of this node.
@@ -68,8 +58,7 @@ public partial class SnapshotNode
     /// <summary>
     /// Children node of this node.
     /// </summary>
-    public IReadOnlyCollection<SnapshotNode> Children => 
-        Value as IReadOnlyCollection<SnapshotNode> ?? [];
+    public IEnumerable<SnapshotNode> Children => Value?.DeclaredNodes ?? [];
 
     /// <summary>
     /// Associated object for the node.
@@ -127,16 +116,16 @@ public partial class SnapshotNode
         {
             field = value;
             // Broadcast the invalidation to child nodes, if any.
-            if (Value is not IEnumerable<SnapshotNode> collection)
+            if (Value is null)
                 return;
-            foreach (var node in collection)
+            foreach (var node in Value.DeclaredNodes)
                 node.Path = null!;
         }
     }
 
     /// <summary>
     /// Locate a node by the specified path.
-    /// The path is a sequence of node names,
+    /// The path is a sequence of node names
     /// and starts with the name of this node.
     /// </summary>
     /// <param name="path">Path to the specified node.</param>
@@ -157,7 +146,7 @@ public partial class SnapshotNode
                 "" => null,
                 "." => current,
                 ".." => current.Parent,
-                _ => current.Value?[name]
+                _ => current.Value?.GetDeclaredNode(name)
             };
         }
 
@@ -166,7 +155,7 @@ public partial class SnapshotNode
 
     /// <summary>
     /// Locate a node by the specified path.
-    /// The path is a '/'-separated string of node names,
+    /// The path is a '/'-separated string of node names
     /// and starts with the name of this node.
     /// </summary>
     /// <param name="path">Path to the specified node.</param>
@@ -181,4 +170,8 @@ public partial class SnapshotNode
             _ => Locate(path.Split('/'))
         };
     }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public IEnumerator<SnapshotNode> GetEnumerator() => Children.GetEnumerator();
 }

@@ -1,4 +1,5 @@
 ﻿using SnapshotExpert.Data.Values;
+using SnapshotExpert.Data.Values.Primitives;
 
 namespace SnapshotExpert.Data.Schemas;
 
@@ -26,13 +27,13 @@ public abstract record PrimitiveSchema : SnapshotSchema
             case < 1:
                 throw new Exception("Types cannot be empty.");
             case 1:
-                typeNode.AssignValue(AllowedTypes.First().ToTypeName());
+                typeNode.BindValue(AllowedTypes.First().ToTypeName());
                 break;
             default:
             {
-                var typesArray = typeNode.AssignArray();
+                var typesArray = typeNode.AssignValue(new ArrayValue());
                 foreach (var type in AllowedTypes)
-                    typesArray.CreateNode().AssignValue(type.ToTypeName());
+                    typesArray.CreateNode().BindValue(new StringValue(type.ToTypeName()));
                 break;
             }
         }

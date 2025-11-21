@@ -2,33 +2,10 @@
 
 namespace SnapshotExpert.Data.Values;
 
-public class ArrayValue(int capacity = 0) : SnapshotValue, 
-    IReadOnlyCollection<SnapshotNode>, IEnumerable<SnapshotValue>
+public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<SnapshotValue>
 {
     private readonly List<SnapshotNode> _nodes = new(capacity);
 
-    internal override SnapshotNode? this[string name]
-    {
-        get
-        {
-            if (int.TryParse(name, out var index) && index >= 0 && index < _nodes.Count)
-                return _nodes[index];
-            return null;
-        }
-    }
-
-    internal override string DebuggerString => "Array";
-    
-    /// <summary>
-    /// Content nodes defined in this array value.
-    /// </summary>
-    public IReadOnlyList<SnapshotNode> Nodes => _nodes;
-    
-    /// <summary>
-    /// Count of nodes in this array value.
-    /// </summary>
-    public int Count => _nodes.Count;
-    
     /// <summary>
     /// Construct an array value with the specified content.
     /// </summary>
@@ -38,7 +15,35 @@ public class ArrayValue(int capacity = 0) : SnapshotValue,
         foreach (var item in values)
             CreateNode().Value = item;
     }
-    
+
+    public override IEnumerable<SnapshotNode> DeclaredNodes => _nodes;
+
+    public override string DebuggerString => "Array";
+
+    /// <summary>
+    /// Access the snapshot node at the specified index in the content of this array value.
+    /// </summary>
+    /// <param name="index">Index of the specified snapshot node.</param>
+    public SnapshotNode this[int index] => _nodes[index];
+
+    /// <summary>
+    /// Count of nodes in this array value.
+    /// </summary>
+    public int Count => _nodes.Count;
+
+    public IEnumerator<SnapshotValue> GetEnumerator()
+        => _nodes.Select(node => node.Value!).GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() 
+        => GetEnumerator();
+
+    public override SnapshotNode? GetDeclaredNode(string name)
+    {
+        if (int.TryParse(name, out var index) && index >= 0 && index < _nodes.Count)
+            return _nodes[index];
+        return null;
+    }
+
     /// <summary>
     /// Create a node in the content of this array value.
     /// </summary>
@@ -49,7 +54,7 @@ public class ArrayValue(int capacity = 0) : SnapshotValue,
         _nodes.Add(node);
         return node;
     }
-    
+
     /// <summary>
     /// Create a node in the content of this array value.
     /// </summary>
@@ -71,22 +76,29 @@ public class ArrayValue(int capacity = 0) : SnapshotValue,
     {
         if (index < 0 || index >= _nodes.Count)
             throw new ArgumentOutOfRangeException(nameof(index), "Index of the node to delete is out of range.");
-        _nodes[index].Detach();
         _nodes.RemoveAt(index);
 
         // Rename nodes.
         foreach (var pair in _nodes.Index())
             pair.Item.Name = pair.Index.ToString();
     }
-
+    
     /// <summary>
-    /// Access the snapshot node at the specified index in the content of this array value.
+    /// Add a snapshot value to the end of this array value.
     /// </summary>
-    /// <param name="index">Index of the specified snapshot node.</param>
-    public SnapshotNode this[int index] => _nodes[index];
+    /// <param name="value">Value to add.</param>
+    public void Add(SnapshotValue value) => CreateNode(value);
 
     /// <summary>
-    /// Compare the content this array value with that of another array value.
+    /// Remove all nodes that have equal content with the specified value
+    /// using <see cref="SnapshotValue.ContentEquals(SnapshotValue?)"/> method."
+    /// </summary>
+    /// <param name="value">Value to compare.</param>
+    public void Remove(SnapshotValue value)
+        => _nodes.RemoveAll(node => SnapshotValue.ContentEquals(node.Value, value));
+    
+    /// <summary>
+    /// Compare the content of this array value with that of another array value.
     /// These contents are considered as equal when satisfying all requirements: <br/>
     /// - Both values have the same number of nodes in their content. <br/>
     /// - Both values have nodes with the same names in their content. <br/>
@@ -111,14 +123,5 @@ public class ArrayValue(int capacity = 0) : SnapshotValue,
         return true;
     }
 
-    private static int ConstantContentHashCode { get; } = typeof(ArrayValue).GetHashCode();
-
-    public override int GetContentHashCode() => ConstantContentHashCode;
-
-    public IEnumerator<SnapshotValue> GetEnumerator() 
-        => _nodes.Select(node => node.Value!).GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => _nodes.GetEnumerator();
-
-    IEnumerator<SnapshotNode> IEnumerable<SnapshotNode>.GetEnumerator() => _nodes.GetEnumerator();
+    public override int GetContentHashCode() => _nodes.GetHashCode();
 }

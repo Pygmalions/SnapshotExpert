@@ -2,7 +2,7 @@
 
 public class StringValue(string value = "") : PrimitiveValue
 {
-    internal override string DebuggerString => $"(String) \"{Value}\"";
+    public override string DebuggerString => $"(String) \"{Value}\"";
 
     public string Value { get; set; } = value;
     

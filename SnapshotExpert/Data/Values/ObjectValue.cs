@@ -1,25 +1,11 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SnapshotExpert.Data.Values;
 
-public class ObjectValue() : SnapshotValue,
-    IReadOnlyCollection<SnapshotNode>, IEnumerable<KeyValuePair<string, SnapshotValue?>>
+public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, SnapshotValue?>>
 {
     private readonly OrderedDictionary<string, SnapshotNode> _nodes = [];
-
-    internal override SnapshotNode? this[string name] => _nodes.GetValueOrDefault(name);
-
-    internal override string DebuggerString => "Object";
-
-    /// <summary>
-    /// Content nodes defined in this object value.
-    /// </summary>
-    public IReadOnlyDictionary<string, SnapshotNode> Nodes => _nodes;
-
-    /// <summary>
-    /// Count of nodes in this object value.
-    /// </summary>
-    public int Count => _nodes.Count;
 
     /// <summary>
     /// Construct an object value with the specified content.
@@ -41,6 +27,33 @@ public class ObjectValue() : SnapshotValue,
     {
     }
 
+    public override IEnumerable<SnapshotNode> DeclaredNodes => _nodes.Values;
+
+    public override string DebuggerString => "Object";
+
+    /// <summary>
+    /// Count of nodes in this object value.
+    /// </summary>
+    public int Count => _nodes.Count;
+
+    public SnapshotValue this[string name]
+    {
+        get => GetDeclaredNode(name)?.Value ?? 
+               throw new KeyNotFoundException($"Cannot find node '{name}' in this object value.");
+        set => (GetDeclaredNode(name) ?? CreateNode(name)).Value = value;
+    }
+
+    public IEnumerator<KeyValuePair<string, SnapshotValue?>> GetEnumerator()
+        => _nodes
+            .Select(pair => new KeyValuePair<string, SnapshotValue?>(
+                pair.Key, pair.Value?.Value))
+            .GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => _nodes.Values.GetEnumerator();
+
+    public override SnapshotNode? GetDeclaredNode(string name)
+        => _nodes.GetValueOrDefault(name);
+
     /// <summary>
     /// Create a node at the specified index in the content of this value.
     /// </summary>
@@ -53,15 +66,12 @@ public class ObjectValue() : SnapshotValue,
     public SnapshotNode InsertNode(int index, string name)
     {
         var node = new SnapshotNode(this, name);
-        if (!_nodes.ContainsKey(name))
-        {
-            _nodes.Insert(index, name, node);
-            return node;
-        }
-
-        node.Detach();
-        throw new ArgumentException($"Node with name '{name}' already exists in the content of this value.",
-            nameof(name));
+        if (_nodes.ContainsKey(name))
+            throw new ArgumentException(
+                $"Node with name '{name}' already exists in this object value.",
+                nameof(name));
+        _nodes.Insert(index, name, node);
+        return node;
     }
 
     /// <summary>
@@ -77,8 +87,8 @@ public class ObjectValue() : SnapshotValue,
         var node = new SnapshotNode(this, name);
         if (_nodes.TryAdd(name, node))
             return node;
-        node.Detach();
-        throw new ArgumentException($"Node with name '{name}' already exists in the content of this value.",
+        throw new ArgumentException(
+            $"Node with name '{name}' already exists in the content of this value.",
             nameof(name));
     }
 
@@ -103,16 +113,43 @@ public class ObjectValue() : SnapshotValue,
     /// </summary>
     /// <param name="name">Name of the node to delete.</param>
     /// <returns>True if the node is found and deleted, otherwise false.</returns>
-    public bool DeleteNode(string name)
-    {
-        if (!_nodes.Remove(name, out var node))
-            return false;
-        node.Detach();
-        return true;
-    }
+    public bool Remove(string name)
+        => _nodes.Remove(name, out _);
+    
+    /// <summary>
+    /// Delete the node with the specified name from the content of this value.
+    /// </summary>
+    /// <param name="name">Name of the node to delete.</param>
+    /// <param name="node">Removed node with the specified name.</param>
+    /// <returns>True if the node is found and deleted, otherwise false.</returns>
+    public bool Remove(string name, [MaybeNullWhen(false)] out SnapshotNode node)
+        => _nodes.Remove(name, out node);
 
     /// <summary>
-    /// Compare the content this object value with that of another object value.
+    /// Add a node to the end of this object value.
+    /// </summary>
+    /// <param name="node">Node to add.</param>
+    /// <exception cref="ArgumentException">
+    /// Thrown if a node with the same name already exists in the content of this value.
+    /// </exception>
+    public void Add(SnapshotNode node)
+    {
+        if (!_nodes.TryAdd(node.Name, node))
+            throw new ArgumentException(
+                $"Node with name '{node.Name}' already exists in this object value.",
+                nameof(node));
+    }
+    
+    /// <summary>
+    /// Remove the snapshot from this object value.
+    /// </summary>
+    /// <param name="node">Node to remove.</param>
+    /// <returns></returns>
+    public bool Remove(SnapshotNode node) 
+        => _nodes.Remove(node.Name);
+
+    /// <summary>
+    /// Compare the content of this object value with that of another object value.
     /// These contents are considered as equal when satisfying all requirements: <br/>
     /// - Both values have the same number of nodes in their content. <br/>
     /// - Both values have nodes with the same names in their content. <br/>
@@ -141,19 +178,7 @@ public class ObjectValue() : SnapshotValue,
         return true;
     }
 
-    private static int ConstantContentHashCode { get; } = typeof(ArrayValue).GetHashCode();
-
-    public override int GetContentHashCode() => ConstantContentHashCode;
-
-    public IEnumerator<KeyValuePair<string, SnapshotValue?>> GetEnumerator()
-        => _nodes
-            .Select(pair => new KeyValuePair<string, SnapshotValue?>(
-                pair.Key, pair.Value.Value!))
-            .GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => _nodes.Values.GetEnumerator();
-
-    IEnumerator<SnapshotNode> IEnumerable<SnapshotNode>.GetEnumerator() => _nodes.Values.GetEnumerator();
+    public override int GetContentHashCode() => _nodes.GetHashCode();
 }
 
 public static class ObjectValueExtensions
@@ -166,9 +191,9 @@ public static class ObjectValueExtensions
     /// <param name="name">Name of the node to get.</param>
     public static SnapshotNode RequireNode(this ObjectValue value, string name)
     {
-        if (value.Nodes.TryGetValue(name, out var node))
+        if (value.GetDeclaredNode(name) is { } node)
             return node;
         throw new KeyNotFoundException(
-            $"Required node with name '{name}' does not exist in the content of this object value.");
+            $"Cannot find the required node '{name}' in this object value.");
     }
 }

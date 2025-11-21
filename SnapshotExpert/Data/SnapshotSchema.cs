@@ -58,10 +58,10 @@ public abstract record SnapshotSchema
     public virtual void Generate(ObjectValue schema)
     {
         if (!string.IsNullOrEmpty(Title))
-            schema.CreateNode("title").AssignValue(Title);
+            schema.CreateNode("title").BindValue(Title);
 
         if (!string.IsNullOrEmpty(Description))
-            schema.CreateNode("description").AssignValue(Description);
+            schema.CreateNode("description").BindValue(Description);
 
         if (DefaultValue != null)
             schema.CreateNode("default", DefaultValue);
@@ -71,7 +71,7 @@ public abstract record SnapshotSchema
 
         if (EnumValues != null)
         {
-            var enumsArray = schema.CreateNode("enum").AssignArray();
+            var enumsArray = schema.CreateNode("enum").AssignValue(new ArrayValue());
             foreach (var enumValue in EnumValues)
             {
                 enumsArray.CreateNode(enumValue);
@@ -79,10 +79,10 @@ public abstract record SnapshotSchema
         }
 
         if (IsReadOnly != null)
-            schema.CreateNode("readOnly").AssignValue(IsReadOnly.Value);
+            schema.CreateNode("readOnly").BindValue(IsReadOnly.Value);
 
         if (IsWriteOnly != null)
-            schema.CreateNode("writeOnly").AssignValue(IsWriteOnly.Value);
+            schema.CreateNode("writeOnly").BindValue(IsWriteOnly.Value);
 
         OnGenerate(schema);
     }
@@ -108,21 +108,21 @@ public static class SchemaModelExtensions
     public static BsonDocument ToBsonDocument(this SnapshotSchema model)
     {
         var node = new SnapshotNode();
-        model.Generate(node.AssignObject());
+        model.Generate(node.AssignValue(new ObjectValue()));
         return node.ToBsonDocument();
     }
 
     public static string ToJson(this SnapshotSchema model, JsonWriterSettings? settings = null)
     {
         var node = new SnapshotNode();
-        model.Generate(node.AssignObject());
+        model.Generate(node.AssignValue(new ObjectValue()));
         return node.ToJson(settings ?? new JsonWriterSettings { Indent = true });
     }
 
     public static byte[] ToBson(this SnapshotSchema model)
     {
         var node = new SnapshotNode();
-        model.Generate(node.AssignObject());
+        model.Generate(node.AssignValue(new ObjectValue()));
         return node.ToBson();
     }
 }

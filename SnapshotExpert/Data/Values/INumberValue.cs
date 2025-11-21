@@ -1,29 +1,43 @@
-﻿namespace SnapshotExpert.Data.Values;
+﻿using System.ComponentModel;
 
-public interface INumberInterface
-{
-}
+namespace SnapshotExpert.Data.Values;
 
-public interface IInteger32Number : INumberInterface
+/// <summary>
+/// Snapshot values that can be converted to <see cref="int"/>.
+/// </summary>
+public interface IInteger32Value
 {
     int Value { get; set; }
 }
 
-public interface IInteger64Number : INumberInterface
+/// <summary>
+/// Snapshot values that can be converted to <see cref="long"/>.
+/// </summary>
+public interface IInteger64Value
 {
     long Value { get; set; }
 }
 
-public interface IFloat64Number : INumberInterface
+/// <summary>
+/// Snapshot values that can be converted to <see cref="double"/>.
+/// </summary>
+public interface IFloat64Value
 {
     double Value { get; set; }
 }
 
-public interface IDecimalNumber : INumberInterface
+/// <summary>
+/// Snapshot values that can be converted to <see cref="decimal"/>.
+/// </summary>
+public interface IDecimalValue
 {
     decimal Value { get; set; }
 }
 
+/// <summary>
+/// Snapshot values that can be converted to any supported numeric type.
+/// </summary>
 // ReSharper disable once PossibleInterfaceMemberAmbiguity
-public interface INumberValue : IInteger32Number, IInteger64Number, IFloat64Number, IDecimalNumber
+public interface INumberValue : 
+    IInteger32Value, IInteger64Value, IFloat64Value, IDecimalValue
 {}

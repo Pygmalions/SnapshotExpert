@@ -8,9 +8,9 @@ public record OneOfSchema : SnapshotSchema
     
     protected override void OnGenerate(ObjectValue schema)
     {
-        var array = schema.CreateNode("oneOf").AssignArray();
+        var array = schema.CreateNode("oneOf").AssignValue(new ArrayValue());
         foreach (var model in Schemas)
-            model.Generate(array.CreateNode().AssignObject());
+            model.Generate(array.CreateNode().AssignValue(new ObjectValue()));
     }
 
     protected override bool OnValidate(SnapshotNode node)

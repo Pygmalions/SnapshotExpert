@@ -12,7 +12,7 @@ public class BinaryValue(
     {
     }
 
-    internal override string DebuggerString => $"(Binary) {ContentType} - {Value.Length} bytes)";
+    public override string DebuggerString => $"(Binary) {ContentType} - {Value.Length} bytes)";
 
     public byte[] Value { get; set; } = value ?? [];
 

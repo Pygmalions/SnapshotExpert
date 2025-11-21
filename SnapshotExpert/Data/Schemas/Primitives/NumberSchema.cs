@@ -5,35 +5,35 @@ namespace SnapshotExpert.Data.Schemas.Primitives;
 
 public record NumberSchema() : PrimitiveSchema(JsonValueType.Number)
 {
-    public decimal? MinimumValue { get; init; } = null;
+    public decimal? MinimumValue { get; init; }
 
-    public decimal? MaximumValue { get; init; } = null;
+    public decimal? MaximumValue { get; init; }
 
-    public decimal? ExclusiveMinimumValue { get; init; } = null;
+    public decimal? ExclusiveMinimumValue { get; init; }
 
-    public decimal? ExclusiveMaximumValue { get; init; } = null;
+    public decimal? ExclusiveMaximumValue { get; init; }
 
     /// <summary>
     /// The value should be a multiple of this number.
     /// </summary>
-    public decimal? MultipleOfValue { get; init; } = null;
+    public decimal? MultipleOfValue { get; init; }
 
     protected override void OnGenerate(ObjectValue schema)
     {
         if (MinimumValue != null)
-            schema.CreateNode("minimum").AssignValue(MinimumValue.Value);
+            schema.CreateNode("minimum").BindValue(MinimumValue.Value);
 
         if (MaximumValue != null)
-            schema.CreateNode("maximum").AssignValue(MaximumValue.Value);
+            schema.CreateNode("maximum").BindValue(MaximumValue.Value);
 
         if (ExclusiveMinimumValue != null)
-            schema.CreateNode("exclusiveMinimum").AssignValue(ExclusiveMinimumValue.Value);
+            schema.CreateNode("exclusiveMinimum").BindValue(ExclusiveMinimumValue.Value);
         
         if (ExclusiveMaximumValue != null)
-            schema.CreateNode("exclusiveMaximum").AssignValue(ExclusiveMaximumValue.Value);
+            schema.CreateNode("exclusiveMaximum").BindValue(ExclusiveMaximumValue.Value);
 
         if (MultipleOfValue != null)
-            schema.CreateNode("multipleOf").AssignValue(MultipleOfValue.Value);
+            schema.CreateNode("multipleOf").BindValue(MultipleOfValue.Value);
     }
 
     protected override bool OnValidate(SnapshotNode node)

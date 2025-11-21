@@ -2,7 +2,7 @@
 
 public class BooleanValue(bool value = false) : PrimitiveValue
 {
-    internal override string DebuggerString => $"(Boolean) {Value}";
+    public override string DebuggerString => $"(Boolean) {Value}";
 
     public bool Value { get; set; } = value;
     

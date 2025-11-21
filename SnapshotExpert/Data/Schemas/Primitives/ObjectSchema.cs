@@ -5,61 +5,71 @@ namespace SnapshotExpert.Data.Schemas.Primitives;
 
 public record ObjectSchema() : PrimitiveSchema(JsonValueType.Object)
 {
-    public int? MinProperties { get; init; } = null;
+    public int? MinProperties { get; init; }
 
-    public int? MaxProperties { get; init; } = null;
+    public int? MaxProperties { get; init; }
 
-    public OrderedDictionary<string, SnapshotSchema>? OptionalProperties { get; init; } = null;
+    /// <summary>
+    /// Optional properties.
+    /// </summary>
+    public OrderedDictionary<string, SnapshotSchema>? OptionalProperties { get; init; }
 
-    public OrderedDictionary<string, SnapshotSchema>? RequiredProperties { get; init; } = null;
+    /// <summary>
+    /// Required properties.
+    /// </summary>
+    public OrderedDictionary<string, SnapshotSchema>? RequiredProperties { get; init; }
 
     /// <summary>
     /// Schema for additional properties. If null, additional properties are not allowed.
     /// </summary>
-    public SnapshotSchema? AdditionalProperties { get; init; } = null;
+    public SnapshotSchema? AdditionalProperties { get; init; }
 
-    public List<(Regex Pattern, SnapshotSchema Model)>? PatternProperties { get; init; } = null;
+    public List<(Regex Pattern, SnapshotSchema Model)>? PatternProperties { get; init; }
 
     protected override void OnGenerate(ObjectValue schema)
     {
         if (OptionalProperties?.Count > 0 || RequiredProperties?.Count > 0)
         {
-            var properties = schema.CreateNode("properties").AssignObject();
+            var properties = schema.CreateNode("properties").AssignValue(new ObjectValue());
 
             if (RequiredProperties?.Count > 0)
                 foreach (var (name, property) in RequiredProperties)
-                    property.Generate(properties.CreateNode(name).AssignObject());
+                    property.Generate(properties.CreateNode(name).AssignValue(new ObjectValue()));
 
             if (OptionalProperties?.Count > 0)
                 foreach (var (name, property) in OptionalProperties)
-                    property.Generate(properties.CreateNode(name).AssignObject());
+                    property.Generate(properties.CreateNode(name).AssignValue(new ObjectValue()));
         }
 
         if (RequiredProperties?.Count > 0)
         {
-            var propertyNames = schema.CreateNode("required").AssignArray();
+            var propertyNames = schema.CreateNode("required").AssignValue(new ArrayValue());
 
             foreach (var (name, _) in RequiredProperties)
-                propertyNames.CreateNode().AssignValue(name);
+                propertyNames.CreateNode().Value = name;
         }
 
         var additionalProperties = schema.CreateNode("additionalProperties");
         if (AdditionalProperties == null)
-            additionalProperties.AssignValue(false);
+            additionalProperties.BindValue(false);
         else
-            AdditionalProperties.Generate(additionalProperties.AssignObject());
+            AdditionalProperties.Generate(additionalProperties.AssignValue(new ObjectValue()));
 
         if (MinProperties != null)
-            schema.CreateNode("minProperties").AssignValue(MinProperties.Value);
+            schema.CreateNode("minProperties").BindValue(MinProperties.Value);
 
         if (MaxProperties != null)
-            schema.CreateNode("maxProperties").AssignValue(MaxProperties.Value);
+            schema.CreateNode("maxProperties").BindValue(MaxProperties.Value);
 
         if (PatternProperties?.Count > 0)
         {
-            var patternProperties = schema.CreateNode("patternProperties").AssignObject();
+            var patternProperties = schema
+                .CreateNode("patternProperties")
+                .AssignValue(new ObjectValue());
             foreach (var (pattern, model) in PatternProperties)
-                model.Generate(patternProperties.CreateNode(pattern.ToString()).AssignObject());
+                model.Generate(patternProperties
+                    .CreateNode(pattern.ToString())
+                    .AssignValue(new ObjectValue()));
         }
     }
 
@@ -75,32 +85,32 @@ public record ObjectSchema() : PrimitiveSchema(JsonValueType.Object)
 
         var propertySchemas = new (SnapshotNode, SnapshotSchema)[document.Count];
         var counterRequiredProperty = 0;
-        foreach (var (index, propertyNode) in document.Nodes.Index())
+        foreach (var (index, propertyNode) in document.DeclaredNodes.Index())
         {
-            if (RequiredProperties?.TryGetValue(propertyNode.Key, out var propertySchema) == true)
+            if (RequiredProperties?.TryGetValue(propertyNode.Name, out var propertySchema) == true)
             {
                 ++counterRequiredProperty;
-                propertySchemas[index] = (propertyNode.Value, propertySchema);
+                propertySchemas[index] = (propertyNode, propertySchema);
                 continue;
             }
 
-            if (OptionalProperties?.TryGetValue(propertyNode.Key, out propertySchema) == true)
+            if (OptionalProperties?.TryGetValue(propertyNode.Name, out propertySchema) == true)
             {
-                propertySchemas[index] = (propertyNode.Value, propertySchema);
+                propertySchemas[index] = (propertyNode, propertySchema);
                 continue;
             }
 
             if (AdditionalProperties == null)
                 return false;
-            propertySchemas[index] = (propertyNode.Value, AdditionalProperties);
+            propertySchemas[index] = (propertyNode, AdditionalProperties);
         }
 
         if (counterRequiredProperty != RequiredProperties?.Count)
             return false;
 
-        foreach (var (propertyNode, propretySchema) in propertySchemas)
+        foreach (var (propertyNode, propertySchema) in propertySchemas)
         {
-            if (!propretySchema.Validate(propertyNode))
+            if (!propertySchema.Validate(propertyNode))
                 return false;
         }
 
@@ -108,11 +118,11 @@ public record ObjectSchema() : PrimitiveSchema(JsonValueType.Object)
             return true;
 
         // Check for pattern properties.
-        foreach (var (name, propertyNode) in document.Nodes)
+        foreach (var propertyNode in document.DeclaredNodes)
         {
             foreach (var (pattern, schema) in PatternProperties)
             {
-                if (pattern.IsMatch(name) && !schema.Validate(propertyNode))
+                if (pattern.IsMatch(propertyNode.Name) && !schema.Validate(propertyNode))
                     return false;
             }
         }

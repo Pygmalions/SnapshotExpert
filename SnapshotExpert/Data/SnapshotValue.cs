@@ -3,16 +3,35 @@
 namespace SnapshotExpert.Data;
 
 [DebuggerDisplay("{DebuggerString,nq}")]
-public abstract partial class SnapshotValue
+public abstract partial class SnapshotValue : ISnapshotConvertible
 {
-    internal SnapshotValue() { }
-    
+    internal SnapshotValue()
+    {
+    }
+
     /// <summary>
     /// The node that this value is bound to.
     /// By assigning this value to the <see cref="SnapshotNode.Value"/> property,
     /// the value is bound to the node.
     /// </summary>
     public SnapshotNode? DeclaringNode { get; internal set; }
+
+    /// <summary>
+    /// Nodes declared by this value.
+    /// </summary>
+    public virtual IEnumerable<SnapshotNode> DeclaredNodes => [];
+
+    /// <summary>
+    /// Get the declared node with the specified name.
+    /// </summary>
+    /// <param name="name">Name of the node declared by this value.</param>
+    /// <returns>Located node, or null if not found.</returns>
+    public virtual SnapshotNode? GetDeclaredNode(string name) => null;
+    
+    /// <summary>
+    /// Human-readable string for this node to display in the debugger.
+    /// </summary>
+    public abstract string DebuggerString { get; }
 
     /// <summary>
     /// Compare the content of this value with another value.
@@ -29,21 +48,11 @@ public abstract partial class SnapshotValue
     public abstract int GetContentHashCode();
 
     /// <summary>
-    /// Get the node with the specified name in the content of this value.
-    /// </summary>
-    /// <param name="name">Name of the node to locate.</param>
-    /// <returns>Located node, or null if not found.</returns>
-    internal abstract SnapshotNode? this[string name] { get; }
-
-    /// <summary>
-    /// Human-readable string for this node to display in the debugger.
-    /// </summary>
-    internal abstract string DebuggerString { get; }
-    
-    /// <summary>
     /// Compares the content of two snapshot values.
     /// Two values are considered equal if they are both null or their content is equal.
     /// </summary>
     public static bool ContentEquals(SnapshotValue? x, SnapshotValue? y)
         => ReferenceEquals(x, y) || (x?.ContentEquals(y) ?? y == null);
+
+    SnapshotValue ISnapshotConvertible.Value => this;
 }

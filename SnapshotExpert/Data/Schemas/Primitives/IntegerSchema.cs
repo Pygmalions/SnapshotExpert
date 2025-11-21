@@ -5,27 +5,27 @@ namespace SnapshotExpert.Data.Schemas.Primitives;
 
 public record IntegerSchema() : PrimitiveSchema(JsonValueType.Integer)
 {
-    public long? Minimum { get; init; } = null;
+    public long? Minimum { get; init; }
 
-    public long? Maximum { get; init; } = null;
+    public long? Maximum { get; init; }
 
-    public long? ExclusiveMinimum { get; init; } = null;
+    public long? ExclusiveMinimum { get; init; }
     
-    public long? ExclusiveMaximum { get; init; } = null;
+    public long? ExclusiveMaximum { get; init; }
     
     protected override void OnGenerate(ObjectValue schema)
     {
         if (Minimum != null)
-            schema.CreateNode("minimum").AssignValue(Minimum.Value);
+            schema.CreateNode("minimum").BindValue(Minimum.Value);
 
         if (Maximum != null)
-            schema.CreateNode("maximum").AssignValue(Maximum.Value);
+            schema.CreateNode("maximum").BindValue(Maximum.Value);
 
         if (ExclusiveMinimum != null)
-            schema.CreateNode("exclusiveMinimum").AssignValue(ExclusiveMinimum.Value);
+            schema.CreateNode("exclusiveMinimum").BindValue(ExclusiveMinimum.Value);
 
         if (ExclusiveMaximum != null)
-            schema.CreateNode("exclusiveMaximum").AssignValue(ExclusiveMaximum.Value);
+            schema.CreateNode("exclusiveMaximum").BindValue(ExclusiveMaximum.Value);
     }
 
     protected override bool OnValidate(SnapshotNode node)

@@ -10,35 +10,35 @@ public record StringSchema() : PrimitiveSchema(JsonValueType.String)
     /// <summary>
     /// A hint on the format of the string, only for documentation purposes.
     /// </summary>
-    [ValueProvider("SnapshotExpert.Framework.Schema.Primitives.StringSchema.BuiltinFormats")]
-    public string? Format { get; init; } = null;
+    [ValueProvider(nameof(BuiltinFormats))]
+    public string? Format { get; init; }
     
-    public int? MaxLength { get; init; } = null;
+    public int? MaxLength { get; init; }
     
-    public int? MinLength { get; init; } = null;
+    public int? MinLength { get; init; }
 
-    public Regex? Pattern { get; init; } = null;
+    public Regex? Pattern { get; init; }
     
-    public ContentEncodingType? ContentEncoding { get; init; } = null;
+    public ContentEncodingType? ContentEncoding { get; init; }
     
-    public string? ContentMediaType { get; init; } = null;
+    public string? ContentMediaType { get; init; }
     
     protected override void OnGenerate(ObjectValue schema)
     {
         if (Format != null)
-            schema.CreateNode("format").AssignValue(Format);
+            schema.CreateNode("format").Value = Format;
 
         if (MinLength != null)
-            schema.CreateNode("minLength").AssignValue(MinLength.Value);
+            schema.CreateNode("minLength").Value = MinLength.Value;
         
         if (MaxLength != null)
-            schema.CreateNode("maxLength").AssignValue(MaxLength.Value);
+            schema.CreateNode("maxLength").Value = MaxLength.Value;
 
         if (Pattern != null)
-            schema.CreateNode("pattern").AssignValue(Pattern.ToString());
+            schema.CreateNode("pattern").Value = Pattern.ToString();
         
         if (ContentEncoding != null)
-            schema.CreateNode("contentEncoding").AssignValue(ContentEncoding switch
+            schema.CreateNode("contentEncoding").BindValue(ContentEncoding switch
             {
                 ContentEncodingType.QuotedPrintable => "quoted-printable",
                 ContentEncodingType.Base16 => "base16",
@@ -48,7 +48,7 @@ public record StringSchema() : PrimitiveSchema(JsonValueType.String)
             });
         
         if (ContentMediaType != null)
-            schema.CreateNode("contentMediaType").AssignValue(ContentMediaType);
+            schema.CreateNode("contentMediaType").Value = ContentMediaType;
     }
 
     protected override bool OnValidate(SnapshotNode node)

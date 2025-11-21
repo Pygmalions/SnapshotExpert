@@ -2,7 +2,7 @@
 
 public class DateTimeValue(DateTimeOffset value = default) : PrimitiveValue
 {
-    internal override string DebuggerString => $"(DateTime - UTC) {Value}";
+    public override string DebuggerString => $"(DateTime - UTC) {Value}";
 
     public DateTimeOffset Value { get; set; } = value;
 
