@@ -14,7 +14,7 @@
         <PackageTags>Serialization BSON JSON Automated-Serialization Serializer-Generator IL-Emitting</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <LangVersion>preview</LangVersion>
-        <Version>0.3.0-dev11192245</Version>
+        <Version>0.3.0-dev11220118</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -29,8 +29,8 @@
 
     <ItemGroup>
         <PackageReference Include="DocumentationParser" Version="0.1.0"/>
-        <PackageReference Include="EmitToolbox" Version="0.3.0-dev11191711" />
-        <PackageReference Include="InjectionExpert" Version="0.3.0-dev11192209" />
+        <PackageReference Include="EmitToolbox" Version="0.3.0-dev11212044" />
+        <PackageReference Include="InjectionExpert" Version="0.3.0-dev11212052" />
         <PackageReference Include="MongoDB.Bson" Version="3.5.0" />
     </ItemGroup>
 

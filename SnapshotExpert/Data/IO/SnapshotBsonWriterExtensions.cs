@@ -5,7 +5,7 @@ using SnapshotExpert.Data.Values.Primitives;
 
 namespace SnapshotExpert.Data.IO;
 
-public static class SnapshotBsonWriter
+public static class SnapshotBsonWriterExtensions
 {
     extension(SnapshotNode self)
     {
@@ -15,10 +15,10 @@ public static class SnapshotBsonWriter
         /// </summary>
         /// <param name="writer">Writer to write BSON data into.</param>
         /// <exception cref="InvalidOperationException">
-        /// Throw if no self.Value is bound to this node, a.k.a. <see cref="self.Value"/> is null.
+        /// Throw if no value is bound to this node, a.k.a. <see cref="SnapshotNode.Value"/> is null.
         /// </exception>
         /// <exception cref="Exception">
-        /// Throw if the self.Value contains an unsupported part.
+        /// Throw if the value contains an unsupported part.
         /// </exception>
         public void Dump(IBsonWriter writer)
         {
