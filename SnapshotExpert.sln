@@ -6,9 +6,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotExpert.Test", "Test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D463BEA2-EE31-4ADA-B19F-2D5652FB0F6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotExpert.Remoting", "SnapshotExpert.Remoting\SnapshotExpert.Remoting.csproj", "{C0DDC896-313A-4B51-A1B5-F466C4E3E4F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotExpert.Proxying", "SnapshotExpert.Proxying\SnapshotExpert.Proxying.csproj", "{C0DDC896-313A-4B51-A1B5-F466C4E3E4F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotExpert.Remoting.Test", "Tests\SnapshotExpert.Remoting.Test\SnapshotExpert.Remoting.Test.csproj", "{5E8A11DC-6CC3-4EA7-B665-8FDFC39B653A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnapshotExpert.Proxying.Test", "Tests\SnapshotExpert.Proxying.Test\SnapshotExpert.Proxying.Test.csproj", "{5E8A11DC-6CC3-4EA7-B665-8FDFC39B653A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

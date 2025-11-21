@@ -5,7 +5,7 @@ namespace SnapshotExpert.Remoting;
 
 public static class SerializerContainerExtensionsForRemoting
 {
-    private static SnapshotSerializer? CreateSerializerForRemoting(
+    private static SnapshotSerializer? CreateSerializerForProxying(
         Type targetType, IInjectionProvider provider)
     {
         if (!targetType.IsGenericType)
@@ -21,13 +21,13 @@ public static class SerializerContainerExtensionsForRemoting
         return null;
     }
 
-    public static TContainer UseRemotingSerializers<TContainer>(this TContainer container)
+    public static TContainer UseProxyingSerializers<TContainer>(this TContainer container)
         where TContainer : ISerializerContainer
     {
         container.WithSerializer<CancellationToken, CancellationTokenEmptySerializer>();
         container.WithSerializer<Task, TaskSynchronousSerializer>();
         container.WithSerializer<ValueTask, ValueTaskSynchronousSerializer>();
-        container.WithFactory(CreateSerializerForRemoting);
+        container.WithFactory(CreateSerializerForProxying);
         
         return container;
     }
