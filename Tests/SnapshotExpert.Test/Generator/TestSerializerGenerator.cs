@@ -79,11 +79,11 @@ public class TestSerializerGenerator
         {
             var value = (ObjectValue)node.Value!;
             Assert.That(value, Is.Not.Null);
-            Assert.That((value["_privateField"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["_privateField"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.PrivateField));
-            Assert.That((value["Field"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["Field"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.Field));
-            Assert.That((value["Property"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["Property"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.Property));
         });
     }
@@ -101,7 +101,7 @@ public class TestSerializerGenerator
         
 
         var node = new SnapshotNode();
-        node.AssignObject(new Dictionary<string, SnapshotValue>()
+        node.AssignValue(new ObjectValue()
         {
             ["_privateField"] = new Integer32Value(privateFieldValue),
             ["Field"] = new Integer32Value(fieldValue),
@@ -140,9 +140,9 @@ public class TestSerializerGenerator
         {
             var value = (ObjectValue)node.Value!;
             Assert.That(value, Is.Not.Null);
-            Assert.That((value["Field"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["Field"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.Field));
-            Assert.That((value["Property"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["Property"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.Property));
         });
     }
@@ -158,7 +158,7 @@ public class TestSerializerGenerator
         var propertyValue = TestContext.CurrentContext.Random.Next();
 
         var node = new SnapshotNode();
-        node.AssignObject(new Dictionary<string, SnapshotValue>()
+        node.AssignValue(new ObjectValue()
         {
             ["Field"] = new Integer32Value(fieldValue),
             ["Property"] = new Integer32Value(propertyValue)
@@ -198,15 +198,15 @@ public class TestSerializerGenerator
         {
             var value = (ObjectValue)node.Value!;
             Assert.That(value, Is.Not.Null);
-            Assert.That((value["_privateField"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["_privateField"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.PrivateField));
-            Assert.That((value["Field"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["Field"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.Field));
-            Assert.That((value["Property"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["Property"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.Property));
-            Assert.That((value["ChildField"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["ChildField"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.ChildField));
-            Assert.That((value["ChildProperty"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["ChildProperty"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.ChildProperty));
         });
     }
@@ -225,7 +225,7 @@ public class TestSerializerGenerator
         var childPropertyValue = TestContext.CurrentContext.Random.Next();
 
         var node = new SnapshotNode();
-        node.AssignObject(new Dictionary<string, SnapshotValue>
+        node.AssignValue(new ObjectValue
         {
             ["_privateField"] = new Integer32Value(privateFieldValue),
             ["Field"] = new Integer32Value(fieldValue),
@@ -285,12 +285,11 @@ public class TestSerializerGenerator
         {
             var value = (ObjectValue)node.Value!;
             Assert.That(value, Is.Not.Null);
-            Assert.That((value["_privateField"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["_privateField"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.PrivateField));
-            Assert.That((value["Field"]?.Value as Integer32Value)?.Value, 
+            Assert.That((value["Field"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.Field));
-            Assert.That(value.Nodes.ContainsKey(
-                nameof(StubClassWithTransientMembers.Property)), Is.False);
+            Assert.That(value.GetDeclaredNode(nameof(StubClassWithTransientMembers.Property)), Is.Null);
         });
     }
 }

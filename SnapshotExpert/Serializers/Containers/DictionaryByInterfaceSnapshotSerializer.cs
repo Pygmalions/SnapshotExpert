@@ -53,7 +53,7 @@ public class DictionaryByInterfaceSnapshotSerializer<TKey, TValue, TTarget, TUnd
         foreach (var (key, value) in target)
         {
             var elementNode = arrayValue.CreateNode();
-            var elementObject = elementNode.AssignObject();
+            var elementObject = elementNode.AssignValue(new ObjectValue());
             var keyNode = elementObject.CreateNode("Key");
             KeySerializer.SaveSnapshot(in key, keyNode, scope);
             var valueNode = elementObject.CreateNode("Value");
@@ -66,14 +66,14 @@ public class DictionaryByInterfaceSnapshotSerializer<TKey, TValue, TTarget, TUnd
     protected override void OnLoadSnapshot(ref TTarget target, SnapshotNode snapshot,
         SnapshotReadingScope scope)
     {
-        var arrayValue = snapshot.RequireValue<ArrayValue>();
+        var arrayValue = snapshot.AsArray;
 
         // Hash sets to track entries that don't exist in the snapshot and should be removed.
         var keys = target.Select(pair => pair.Key).ToHashSet();
 
-        foreach (var elementNode in arrayValue.Nodes)
+        foreach (var elementNode in arrayValue.DeclaredNodes)
         {
-            var pairValue = elementNode.RequireValue<ObjectValue>();
+            var pairValue = elementNode.AsObject;
 
             var keyNode = pairValue.RequireNode("Key");
             KeySerializer.NewInstance(out var key);

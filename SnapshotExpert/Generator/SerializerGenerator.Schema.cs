@@ -24,20 +24,20 @@ public partial class SerializerGenerator
             var text = new StringBuilder();
 
             if (entry.Summary != null)
-                text.Append(entry.Summary);
+                text.Append(entry.Summary.ReplaceLineEndings(" "));
 
             if (entry.Remarks != null)
             {
-                text.Append(" | Remarks: ");
-                text.Append(entry.Remarks);
+                text.Append(" Remarks: ");
+                text.Append(entry.Remarks.ReplaceLineEndings(" "));
             }
 
-            if (entry.Example != null)
+            if (entry.SeeAlsoEntryNames is { Count: > 0 })
             {
-                text.Append(" | Example: ");
-                text.Append(entry.Example);
+                text.Append(" See-Also: ");
+                text.Append(string.Join(", ", entry.SeeAlsoEntryNames));
             }
-
+            
             return text.ToString();
         }
     }
@@ -64,9 +64,10 @@ public partial class SerializerGenerator
                 .DefineInstance(
                     "Documentation", typeof(IDocumentationProvider));
             fieldDocumentation.MarkAttribute(AttributeInjectionMember);
-            
-            _fieldDocumentation = fieldDocumentation.SymbolOf<IDocumentationProvider?>(_method, _method.This());
-            
+
+            _fieldDocumentation = fieldDocumentation.SymbolOf<IDocumentationProvider?>(
+                _method, _method.This());
+
             _variableRequiredProperties = _method.New<OrderedDictionary<string, SnapshotSchema>>();
         }
 
@@ -77,7 +78,7 @@ public partial class SerializerGenerator
             variableObjectSchema.SetPropertyValue(
                 target => target.RequiredProperties!,
                 _variableRequiredProperties);
-            
+
             var variableDocumentation = _method
                 .Invoke(() => SchemaHelper.RetrieveDocumentation(
                         Any<string>.Value, Any<IDocumentationProvider?>.Value)!,
@@ -93,7 +94,7 @@ public partial class SerializerGenerator
                     target => target.Description!,
                     variableDocumentation);
             }
-            
+
             _method.Return(variableObjectSchema);
         }
 

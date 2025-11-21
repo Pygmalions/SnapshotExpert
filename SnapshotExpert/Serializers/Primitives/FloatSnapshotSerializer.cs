@@ -21,7 +21,7 @@ public class Float32SnapshotSerializer : SnapshotSerializer<float>
         => snapshot.Value = new Float64Value(target);
 
     public override void LoadSnapshot(ref float target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = (float)snapshot.RequireNumber<IFloat64Number>().Value;
+        => target = snapshot.AsFloat;
 }
 
 public class Float64SnapshotSerializer : SnapshotSerializer<double>
@@ -40,5 +40,5 @@ public class Float64SnapshotSerializer : SnapshotSerializer<double>
         => snapshot.Value = new Float64Value(target);
 
     public override void LoadSnapshot(ref double target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireNumber<IFloat64Number>().Value;
+        => target = snapshot.AsDouble;
 }

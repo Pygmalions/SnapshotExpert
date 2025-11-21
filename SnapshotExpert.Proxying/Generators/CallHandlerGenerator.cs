@@ -11,7 +11,7 @@ using InjectionExpert;
 using SnapshotExpert.Data;
 using SnapshotExpert.Data.Values;
 using SnapshotExpert.Generator;
-using SnapshotExpert.Utilities;
+using SnapshotExpert.Remoting.Utilities;
 
 namespace SnapshotExpert.Remoting.Generators;
 
@@ -118,10 +118,6 @@ public class CallHandlerGenerator
         
         var argumentSerializedArguments = method.Argument<ObjectValue>(0);
 
-        var variableArgumentNodes = argumentSerializedArguments
-            .GetPropertyValue(target => target.Nodes)
-            .ToSymbol();
-
         var variablesRawArgument = targetMethod.GetParameters()
             .Select(parameter => method.Variable(parameter.ParameterType))
             .ToArray();
@@ -129,9 +125,9 @@ public class CallHandlerGenerator
         // Deserialize arguments.
         foreach (var (index, parameter) in targetMethod.GetParameters().Index())
         {
-            var variableArgumentNode = method.Invoke(
-                () => Any<IReadOnlyDictionary<string, SnapshotNode>>.Value.GetValueOrDefault(Any<string>.Value),
-                [variableArgumentNodes, method.Value(parameter.Name ?? index.ToString())]);
+            var variableArgumentNode = argumentSerializedArguments.Invoke(
+                target => target.GetDeclaredNode(Any<string>.Value),
+                [method.Value(parameter.Name ?? index.ToString())]);
 
             var labelContinue = method.DefineLabel();
 

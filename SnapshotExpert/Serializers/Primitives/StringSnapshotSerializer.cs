@@ -17,7 +17,7 @@ public class StringSnapshotSerializer : SnapshotSerializer<string>
         => snapshot.Value = new StringValue(target);
 
     public override void LoadSnapshot(ref string target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireValue<StringValue>().Value;
+        => target = snapshot.AsString;
 }
 
 public class CharacterSnapshotSerializer : SnapshotSerializer<char>
@@ -38,7 +38,7 @@ public class CharacterSnapshotSerializer : SnapshotSerializer<char>
 
     public override void LoadSnapshot(ref char target, SnapshotNode snapshot, SnapshotReadingScope scope)
     {
-        var value = snapshot.RequireValue<StringValue>().Value;
+        var value = snapshot.AsString;
         if (value.Length != 1)
             throw new InvalidOperationException(
                 "Failed to load snapshot for 'char': snapshot value is not a single character.");

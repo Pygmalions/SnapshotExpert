@@ -49,12 +49,12 @@ public class TestMatrixSerializerGenerator
         Assert.Multiple(() =>
         {
             var rootValue = (ArrayValue)node.Value!;
-            Assert.That(rootValue.Nodes[0].Children
+            Assert.That(rootValue[0].Children
                     .Select(child => child.Value)
                     .OfType<Integer32Value>()
                     .Select(value => value.Value),
                 Is.EquivalentTo(arrays[0]));
-            Assert.That(rootValue.Nodes[1].Children
+            Assert.That(rootValue[1].Children
                     .Select(child => child.Value)
                     .OfType<Integer32Value>()
                     .Select(value => value.Value),
@@ -68,18 +68,18 @@ public class TestMatrixSerializerGenerator
         var serializer = _context.RequireSerializer<int[,]>();
 
         var snapshotNode = new SnapshotNode();
-        var matrixElement = snapshotNode.AssignArray();
+        var matrixElement = snapshotNode.AssignValue(new ArrayValue());
         var arrays = new int[2][];
         var arrayLength = 3;
         for (var dimension = 0; dimension < 2; dimension++)
         {
             arrays[dimension] = new int[arrayLength];
-            var arrayElement = matrixElement.CreateNode().AssignArray();
+            var arrayElement = matrixElement.CreateNode().AssignValue(new ArrayValue());
             for (var index = 0; index < arrayLength; index++)
             {
                 var number = TestContext.CurrentContext.Random.Next();
                 arrays[dimension][index] = number;
-                arrayElement.CreateNode().AssignValue(number);
+                arrayElement.CreateNode().BindValue(number);
             }
         }
         
@@ -108,18 +108,18 @@ public class TestMatrixSerializerGenerator
         var serializer = _context.RequireSerializer<int[,]>();
 
         var snapshotNode = new SnapshotNode();
-        var matrixElement = snapshotNode.AssignArray();
+        var matrixElement = snapshotNode.AssignValue(new ArrayValue());
         var arrays = new int[2][];
         var arrayLength = 3;
         for (var dimension = 0; dimension < 2; dimension++)
         {
             arrays[dimension] = new int[arrayLength];
-            var arrayElement = matrixElement.CreateNode().AssignArray();
+            var arrayElement = matrixElement.CreateNode().AssignValue(new ArrayValue());
             for (var index = 0; index < arrayLength; index++)
             {
                 var number = TestContext.CurrentContext.Random.Next();
                 arrays[dimension][index] = number;
-                arrayElement.CreateNode().AssignValue(number);
+                arrayElement.CreateNode().BindValue(number);
             }
         }
         
@@ -150,18 +150,18 @@ public class TestMatrixSerializerGenerator
         var serializer = _context.RequireSerializer<int[,]>();
 
         var snapshotNode = new SnapshotNode();
-        var matrixElement = snapshotNode.AssignArray();
+        var matrixElement = snapshotNode.AssignValue(new ArrayValue());
         var arrays = new int[2][];
         var arrayLength = 3;
         for (var dimension = 0; dimension < 2; dimension++)
         {
             arrays[dimension] = new int[arrayLength];
-            var arrayElement = matrixElement.CreateNode().AssignArray();
+            var arrayElement = matrixElement.CreateNode().AssignValue(new ArrayValue());
             for (var index = 0; index < arrayLength; index++)
             {
                 var number = TestContext.CurrentContext.Random.Next();
                 arrays[dimension][index] = number;
-                arrayElement.CreateNode().AssignValue(number);
+                arrayElement.CreateNode().BindValue(number);
             }
         }
         

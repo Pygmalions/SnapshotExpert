@@ -59,7 +59,7 @@ public partial class SerializerGenerator
             var fieldSerializer = _context.GetSerializerField(field.FieldType)
                 .SymbolOf(_method, _method.This());
             var fieldMember = _argumentTarget.Field(field);
-            var variableSubNode = _variableObjectValue
+            var variableMemberNode = _variableObjectValue
                 .Invoke(target => target.CreateNode(Any<string>.Value),
                     [_method.Value(metadata.Name)]);
             
@@ -73,7 +73,7 @@ public partial class SerializerGenerator
                     ])!,
                 [
                     fieldMember,
-                    variableSubNode,
+                    variableMemberNode,
                     _argumentScope
                 ]);
         }

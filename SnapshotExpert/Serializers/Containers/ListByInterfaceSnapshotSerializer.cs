@@ -35,9 +35,9 @@ public class ListByInterfaceSnapshotSerializer<TElement, TTarget, TUnderlying>
 
     protected override void OnLoadSnapshot(ref TTarget target, SnapshotNode snapshot, SnapshotReadingScope scope)
     {
-        var arrayValue = snapshot.RequireValue<ArrayValue>();
+        var arrayValue = snapshot.AsArray;
 
-        foreach (var (index, elementNode) in arrayValue.Nodes.Index())
+        foreach (var (index, elementNode) in arrayValue.DeclaredNodes.Index())
         {
             TElement element;
 

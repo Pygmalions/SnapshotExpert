@@ -40,7 +40,8 @@ public class TypeSnapshotSerializer : SnapshotSerializer<Type>
             target = null!;
             return;
         }
-        var typeString = snapshot.RequireValue<StringValue>().Value;
+
+        var typeString = snapshot.AsString;
         target = Type.GetType(typeString) ?? throw new Exception(
             $"Failed to load snapshot: Type '{typeString}' could not be found.");
     }

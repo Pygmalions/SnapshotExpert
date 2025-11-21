@@ -35,8 +35,8 @@ public class TestValueTupleSerializerGenerator
         serializer.SaveSnapshot(value, node);
 
         Assert.That(node.Value, Is.InstanceOf<ArrayValue>());
-        var values = node.RequireValue<ArrayValue>()
-            .Nodes
+        var values = node.AsArray
+            .DeclaredNodes
             .Select(subnode => subnode.Value)
             .OfType<Integer32Value>()
             .Select(subvalue => subvalue.Value);
@@ -52,10 +52,10 @@ public class TestValueTupleSerializerGenerator
             TestContext.CurrentContext.Random.Next());
         
         var node = new SnapshotNode();
-        node.AssignArray([ 
+        node.AssignValue(new ArrayValue([ 
             new Integer32Value(value.Item1),
             new Integer32Value(value.Item2)
-        ]);
+        ]));
         
         serializer.NewInstance(out var restored);
         serializer.LoadSnapshot(ref restored, node);

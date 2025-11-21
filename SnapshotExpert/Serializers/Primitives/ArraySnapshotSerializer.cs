@@ -36,7 +36,7 @@ public class ArraySnapshotSerializer<TElement> : SnapshotSerializerClassTypeBase
 
     protected override void OnLoadSnapshot(ref TElement[] target, SnapshotNode snapshot, SnapshotReadingScope scope)
     {
-        var array = snapshot.RequireValue<ArrayValue>();
+        var array = snapshot.AsArray;
 
         // In patching mode, if the array size is the same and the mode is not specified to other than patching.
         if (snapshot.Mode == SnapshotModeType.Patching && array.Count == target.Length)

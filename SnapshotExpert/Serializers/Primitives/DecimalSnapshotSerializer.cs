@@ -20,5 +20,5 @@ public class DecimalSnapshotSerializer : SnapshotSerializer<decimal>
         => snapshot.Value = new DecimalValue(target);
 
     public override void LoadSnapshot(ref decimal target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireValue<DecimalValue>().Value;
+        => target = snapshot.AsDecimal;
 }

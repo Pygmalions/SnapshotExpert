@@ -141,9 +141,8 @@ internal static class TupleSerializerGenerator
         var code = method.Code;
 
         var variableArray = method.Invoke<ArrayValue>(
-            typeof(SnapshotNodeExtensions)
-                .GetMethod(nameof(SnapshotNodeExtensions.RequireValue))!
-                .MakeGenericMethod(typeof(ArrayValue)),
+            typeof(SnapshotConvertibleExtensions)
+                .GetMethod(nameof(SnapshotConvertibleExtensions.get_AsArray))!,
             [argumentNode]);
 
         // Check the length of the snapshot array.

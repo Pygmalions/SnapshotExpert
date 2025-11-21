@@ -21,7 +21,7 @@ public class DateTimeOffsetSnapshotSerializer : SnapshotSerializer<DateTimeOffse
         => snapshot.Value = new DateTimeValue(target);
 
     public override void LoadSnapshot(ref DateTimeOffset target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireValue<DateTimeValue>().Value;
+        => target = snapshot.AsDateTimeOffset;
 }
 
 public class DateTimeSnapshotSerializer : SnapshotSerializer<DateTime>
@@ -41,5 +41,5 @@ public class DateTimeSnapshotSerializer : SnapshotSerializer<DateTime>
         => snapshot.Value = new DateTimeValue(target);
 
     public override void LoadSnapshot(ref DateTime target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireValue<DateTimeValue>().Value.DateTime.ToLocalTime();
+        => target = snapshot.AsDateTimeOffset.DateTime.ToLocalTime();
 }

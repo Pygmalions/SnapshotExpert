@@ -38,7 +38,7 @@ public class KeyValuePairSnapshotSerializer<TKey, TValue> :
     public override void LoadSnapshot(ref KeyValuePair<TKey, TValue> target, SnapshotNode snapshot,
         SnapshotReadingScope scope)
     {
-        var objectValue = snapshot.RequireValue<ObjectValue>();
+        var objectValue = snapshot.AsObject;
         var keyNode = objectValue.RequireNode("Key");
         var key = target.Key;
         KeySerializer.LoadSnapshot(ref key, keyNode, scope);

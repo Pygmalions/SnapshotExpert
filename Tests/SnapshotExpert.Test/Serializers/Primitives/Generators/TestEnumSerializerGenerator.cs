@@ -84,7 +84,7 @@ public class TestEnumSerializerGenerator
         var serializer = _context.RequireSerializer<SampleEnum>();
 
         var node = new SnapshotNode();
-        node.AssignValue((int)value);
+        node.BindValue((int)value);
         serializer.NewInstance(out var restored);
         serializer.LoadSnapshot(ref restored, node);
         Assert.That(restored, Is.EqualTo(value));
@@ -100,7 +100,7 @@ public class TestEnumSerializerGenerator
         var serializer = _context.RequireSerializer<SampleEnum>();
 
         var node = new SnapshotNode();
-        node.AssignValue(value.ToString());
+        node.BindValue(value.ToString());
         serializer.NewInstance(out var restored);
         serializer.LoadSnapshot(ref restored, node);
         Assert.That(restored, Is.EqualTo(value));

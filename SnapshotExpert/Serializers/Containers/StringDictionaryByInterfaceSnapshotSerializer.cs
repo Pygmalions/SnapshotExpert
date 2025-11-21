@@ -40,13 +40,14 @@ public class StringDictionaryByInterfaceSnapshotSerializer<TValue, TTarget, TUnd
     protected override void OnLoadSnapshot(ref TTarget target, SnapshotNode snapshot,
         SnapshotReadingScope scope)
     {
-        var objectValue = snapshot.RequireValue<ObjectValue>();
+        var objectValue = snapshot.AsObject;
 
         // Hash sets to track entries that don't exist in the snapshot and should be removed.
         var keys = target.Select(pair => pair.Key).ToHashSet();
 
-        foreach (var (key, valueNode) in objectValue.Nodes)
+        foreach (var valueNode in objectValue.DeclaredNodes)
         {
+            var key = valueNode.Name;
             if (target.TryGetValue(key, out var value))
                 keys.Remove(key);
             else

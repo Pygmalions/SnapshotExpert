@@ -1,5 +1,6 @@
 ﻿using SnapshotExpert.Data;
 using SnapshotExpert.Data.Schemas.Primitives;
+using SnapshotExpert.Data.Values.Primitives;
 using SnapshotExpert.Serializers;
 
 namespace SnapshotExpert.Remoting.Serializers;
@@ -15,7 +16,7 @@ public class ValueTaskSynchronousSerializer : SnapshotSerializerValueTypeBase<Va
     {
         if (!target.IsCompleted)
             target.AsTask().Wait();
-        snapshot.AssignNull();
+        snapshot.AssignValue(new NullValue());
     }
 
     public override void LoadSnapshot(ref ValueTask target, SnapshotNode snapshot, SnapshotReadingScope scope)

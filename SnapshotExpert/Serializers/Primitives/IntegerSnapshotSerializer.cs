@@ -23,7 +23,7 @@ public class Integer8SnapshotSerializer : SnapshotSerializer<sbyte>
         => snapshot.Value = new Integer32Value(target);
 
     public override void LoadSnapshot(ref sbyte target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = (sbyte)snapshot.RequireNumber<IInteger32Number>().Value;
+        => target = snapshot.AsSByte;
 }
 
 public class UnsignedInteger8SnapshotSerializer : SnapshotSerializer<byte>
@@ -44,7 +44,7 @@ public class UnsignedInteger8SnapshotSerializer : SnapshotSerializer<byte>
         => snapshot.Value = new Integer32Value(target);
 
     public override void LoadSnapshot(ref byte target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = (byte)snapshot.RequireNumber<IInteger32Number>().Value;
+        => target = snapshot.AsByte;
 }
 
 public class Integer16SnapshotSerializer : SnapshotSerializer<short>
@@ -65,7 +65,7 @@ public class Integer16SnapshotSerializer : SnapshotSerializer<short>
         => snapshot.Value = new Integer32Value(target);
 
     public override void LoadSnapshot(ref short target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = (short)snapshot.RequireNumber<IInteger32Number>().Value;
+        => target = snapshot.AsInt16;
 }
 
 public class UnsignedInteger16SnapshotSerializer : SnapshotSerializer<ushort>
@@ -86,7 +86,7 @@ public class UnsignedInteger16SnapshotSerializer : SnapshotSerializer<ushort>
         => snapshot.Value = new Integer32Value(target);
 
     public override void LoadSnapshot(ref ushort target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = (ushort)snapshot.RequireNumber<IInteger32Number>().Value;
+        => target = snapshot.AsUInt16;
 }
 
 public class Integer32SnapshotSerializer : SnapshotSerializer<int>
@@ -105,7 +105,7 @@ public class Integer32SnapshotSerializer : SnapshotSerializer<int>
         => snapshot.Value = new Integer32Value(target);
 
     public override void LoadSnapshot(ref int target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireNumber<IInteger32Number>().Value;
+        => target = snapshot.AsInt32;
 }
 
 public class UnsignedInteger32SnapshotSerializer : SnapshotSerializer<uint>
@@ -124,7 +124,7 @@ public class UnsignedInteger32SnapshotSerializer : SnapshotSerializer<uint>
         => snapshot.Value = new Integer32Value((int)target);
 
     public override void LoadSnapshot(ref uint target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = (uint)snapshot.RequireNumber<IInteger32Number>().Value;
+        => target = snapshot.AsUInt32;
 }
 
 
@@ -144,7 +144,7 @@ public class Integer64SnapshotSerializer : SnapshotSerializer<long>
         => snapshot.Value = new Integer64Value(target);
 
     public override void LoadSnapshot(ref long target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireNumber<IInteger32Number>().Value;
+        => target = snapshot.AsInt64;
 }
 
 public class UnsignedInteger64SnapshotSerializer : SnapshotSerializer<ulong>
@@ -164,5 +164,5 @@ public class UnsignedInteger64SnapshotSerializer : SnapshotSerializer<ulong>
         => snapshot.Value = new Integer64Value((long)target);
 
     public override void LoadSnapshot(ref ulong target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = (ulong)snapshot.RequireNumber<IInteger64Number>().Value;
+        => target = snapshot.AsUInt64;
 }

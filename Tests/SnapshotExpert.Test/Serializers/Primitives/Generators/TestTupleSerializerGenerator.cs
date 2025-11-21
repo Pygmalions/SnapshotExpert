@@ -30,17 +30,17 @@ public class TestTupleSerializerGenerator
 
         var value = new Tuple<int, int>(TestContext.CurrentContext.Random.Next(),
             TestContext.CurrentContext.Random.Next());
-        
+
         var node = new SnapshotNode();
         serializer.SaveSnapshot(value, node);
 
         Assert.That(node.Value, Is.InstanceOf<ArrayValue>());
-        var values = node.RequireValue<ArrayValue>()
-            .Nodes
+        var values = node.AsArray
+            .DeclaredNodes
             .Select(subnode => subnode.Value)
             .OfType<Integer32Value>()
             .Select(subvalue => subvalue.Value);
-        Assert.That(values, Is.EquivalentTo(new [] { value.Item1, value.Item2 }));
+        Assert.That(values, Is.EquivalentTo(new[] { value.Item1, value.Item2 }));
     }
 
     [Test]
@@ -50,18 +50,18 @@ public class TestTupleSerializerGenerator
 
         var value = new Tuple<int, int>(TestContext.CurrentContext.Random.Next(),
             TestContext.CurrentContext.Random.Next());
-        
+
         var node = new SnapshotNode();
-        node.AssignArray([ 
+        node.AssignValue(new ArrayValue([
             new Integer32Value(value.Item1),
             new Integer32Value(value.Item2)
-        ]);
-        
+        ]));
+
         serializer.NewInstance(out var restored);
         serializer.LoadSnapshot(ref restored, node);
         Assert.That(restored, Is.EqualTo(value));
     }
-    
+
     [Test]
     public void LoadSnapshot_Null()
     {
@@ -69,12 +69,12 @@ public class TestTupleSerializerGenerator
 
         var value = new Tuple<int, int>(TestContext.CurrentContext.Random.Next(),
             TestContext.CurrentContext.Random.Next());
-        
+
         var node = new SnapshotNode();
-        node.AssignArray([ 
+        node.AssignValue(new ArrayValue([
             new Integer32Value(value.Item1),
             new Integer32Value(value.Item2)
-        ]);
+        ]));
 
         Tuple<int, int> restored = null!;
         serializer.LoadSnapshot(ref restored, node);

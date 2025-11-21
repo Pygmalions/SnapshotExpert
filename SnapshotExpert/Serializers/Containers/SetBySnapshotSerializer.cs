@@ -34,11 +34,11 @@ public class SetByInterfaceSnapshotSerializer<TElement, TTarget, TUnderlying>
 
     protected override void OnLoadSnapshot(ref TTarget target, SnapshotNode snapshot, SnapshotReadingScope scope)
     {
-        var array = snapshot.RequireValue<ArrayValue>();
+        var array = snapshot.AsArray;
 
         target.Clear();
 
-        foreach (var elementNode in array.Nodes)
+        foreach (var elementNode in array.DeclaredNodes)
         {
             ElementSerializer.NewInstance(out var element);
             ElementSerializer.LoadSnapshot(ref element, elementNode, scope);

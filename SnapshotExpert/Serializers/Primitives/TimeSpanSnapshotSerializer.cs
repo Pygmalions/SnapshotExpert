@@ -21,5 +21,5 @@ public class TimeSpanSnapshotSerializer : SnapshotSerializer<TimeSpan>
         => snapshot.Value = new StringValue(target.ToString());
 
     public override void LoadSnapshot(ref TimeSpan target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = TimeSpan.Parse(snapshot.RequireValue<StringValue>().Value);
+        => target = TimeSpan.Parse(snapshot.AsString);
 }

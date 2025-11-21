@@ -11,7 +11,7 @@ using InjectionExpert;
 using SnapshotExpert.Data;
 using SnapshotExpert.Data.Values;
 using SnapshotExpert.Generator;
-using SnapshotExpert.Utilities;
+using SnapshotExpert.Remoting.Utilities;
 using DynamicMethod = EmitToolbox.DynamicMethod;
 
 namespace SnapshotExpert.Remoting.Generators;

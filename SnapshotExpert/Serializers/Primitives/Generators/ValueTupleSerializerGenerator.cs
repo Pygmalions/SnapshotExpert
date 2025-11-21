@@ -138,9 +138,8 @@ internal static class ValueTupleSerializerGenerator
         var code = method.Code;
 
         var variableArray = method.Invoke<ArrayValue>(
-            typeof(SnapshotNodeExtensions)
-                .GetMethod(nameof(SnapshotNodeExtensions.RequireValue))!
-                .MakeGenericMethod(typeof(ArrayValue)),
+            typeof(SnapshotConvertibleExtensions)
+                .GetMethod(nameof(SnapshotConvertibleExtensions.get_AsArray))!,
             [argumentNode]
         );
         

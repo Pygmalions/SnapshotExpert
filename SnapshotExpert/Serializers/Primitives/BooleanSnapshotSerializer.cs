@@ -17,5 +17,5 @@ public class BooleanSnapshotSerializer : SnapshotSerializer<bool>
         => snapshot.Value = new BooleanValue(target);
 
     public override void LoadSnapshot(ref bool target, SnapshotNode snapshot, SnapshotReadingScope scope)
-        => target = snapshot.RequireValue<BooleanValue>().Value;
+        => target = snapshot.AsBoolean;
 }

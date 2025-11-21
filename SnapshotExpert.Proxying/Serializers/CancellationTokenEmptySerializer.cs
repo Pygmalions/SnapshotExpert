@@ -1,5 +1,7 @@
-﻿using SnapshotExpert.Data;
+﻿using OneOf.Types;
+using SnapshotExpert.Data;
 using SnapshotExpert.Data.Schemas.Primitives;
+using SnapshotExpert.Data.Values.Primitives;
 using SnapshotExpert.Serializers;
 
 namespace SnapshotExpert.Remoting.Serializers;
@@ -17,7 +19,7 @@ public class CancellationTokenEmptySerializer : SnapshotSerializerValueTypeBase<
 
     public override void SaveSnapshot(in CancellationToken target, SnapshotNode snapshot, SnapshotWritingScope scope)
     {
-        snapshot.AssignNull();
+        snapshot.AssignValue(new NullValue());
     }
 
     public override void LoadSnapshot(ref CancellationToken target, SnapshotNode snapshot, SnapshotReadingScope scope)

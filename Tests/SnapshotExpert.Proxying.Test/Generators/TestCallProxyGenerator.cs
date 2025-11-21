@@ -1,4 +1,4 @@
-﻿using SnapshotExpert.Data.Values;
+﻿using SnapshotExpert.Data;
 using SnapshotExpert.Data.Values.Primitives;
 using SnapshotExpert.Remoting.Generators;
 
@@ -21,9 +21,9 @@ public class TestCallProxyGenerator
         
         var proxy = ICallProxy.FromFunctor(arguments =>
         {
-            var a = arguments.RequireNumber<IInteger32NumberValue>("a");
-            var b = arguments.RequireNumber<IInteger32NumberValue>("b");
-            return new Integer32Value(a.Value + b.Value + testAddition);
+            var a = arguments["a"].AsInt32;
+            var b = arguments["b"].AsInt32;
+            return new Integer32Value(a + b + testAddition);
         });
         
         var proxyFunctor = CallProxyGenerator

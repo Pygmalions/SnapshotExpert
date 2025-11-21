@@ -54,8 +54,9 @@ public partial class SerializerGenerator
 
             _variableObjectValue = _method.Variable<ObjectValue>();
             _variableObjectValue.AssignContent(
-                _method.Invoke(
-                    () => Any<SnapshotNode>.Value.RequireValue<ObjectValue>(),
+                _method.Invoke<ObjectValue>(
+                    typeof(SnapshotConvertibleExtensions)
+                        .GetMethod(nameof(SnapshotConvertibleExtensions.get_AsObject))!,
                     [argumentNode])
             );
 
@@ -69,13 +70,12 @@ public partial class SerializerGenerator
 
         public void Generate(FieldInfo field, MemberInfo metadata)
         {
-            var conditionFoundNode = _variableObjectValue
-                .GetPropertyValue(target => target.Nodes)
-                .Invoke<bool>(typeof(IReadOnlyDictionary<string, SnapshotNode>)
-                        .GetMethod(nameof(IReadOnlyDictionary<,>.TryGetValue))!,
-                    [_method.Value(metadata.Name), _variableMemberNode]);
+            _variableObjectValue.Invoke(
+                    target => target.GetDeclaredNode(Any<string>.Value),
+                    [_method.Value(metadata.Name)])
+                .ToSymbol(_variableMemberNode);
 
-            using (_method.If(conditionFoundNode))
+            using (_method.If(_variableObjectValue.IsNotNull()))
             {
                 var fieldSerializer = _context.GetSerializerField(field.FieldType)
                     .SymbolOf(_method, _method.This());

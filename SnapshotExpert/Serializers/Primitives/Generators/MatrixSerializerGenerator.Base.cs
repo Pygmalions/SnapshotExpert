@@ -48,7 +48,7 @@ public abstract class MatrixSnapshotSerializerBase<TMatrix, TElement>
         for (var dimension = 1; dimension < shape.Length; ++dimension)
         {
             int? length = null;
-            foreach (var subnode in layer.Nodes)
+            foreach (var subnode in layer.DeclaredNodes)
             {
                 if (subnode.Value is not ArrayValue subarray)
                     throw new Exception(

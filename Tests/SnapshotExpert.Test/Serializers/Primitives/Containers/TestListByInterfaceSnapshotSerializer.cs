@@ -3,7 +3,7 @@ using SnapshotExpert.Data;
 using SnapshotExpert.Serializers;
 using SnapshotExpert.Serializers.Containers;
 
-namespace SnapshotExpert.Test.Serializers.Containers;
+namespace SnapshotExpert.Test.Serializers.Primitives.Containers;
 
 [TestFixture, TestOf(typeof(ListByInterfaceSnapshotSerializer<,,>))]
 public class TestListByInterfaceSnapshotSerializer
