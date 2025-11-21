@@ -107,6 +107,10 @@ public static class CallServerGenerator
                 labelEnd.Goto();
             }
         }
+        
+        method.ThrowException<MissingMethodException>(
+            method.FormatString(
+                "Cannot find method with metadata token '{0}'.", [argumentMethod]));
 
         labelEnd.Mark();
 
