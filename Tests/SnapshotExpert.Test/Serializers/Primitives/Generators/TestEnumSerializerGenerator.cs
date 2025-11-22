@@ -7,6 +7,12 @@ namespace SnapshotExpert.Test.Serializers.Primitives.Generators;
 [TestFixture, TestOf(typeof(EnumSerializerGenerator))]
 public class TestEnumSerializerGenerator
 {
+    [SetUp]
+    public void Initialize()
+    {
+        _context = new SerializerContainer();
+    }
+
     public enum SampleEnum
     {
         EntryA = 1,
@@ -16,12 +22,6 @@ public class TestEnumSerializerGenerator
     }
 
     private SerializerContainer _context;
-
-    [SetUp]
-    public void Initialize()
-    {
-        _context = new SerializerContainer();
-    }
 
     [Test]
     public void GenerateSerializerInstance()
@@ -45,13 +45,13 @@ public class TestEnumSerializerGenerator
         {
             Format = SnapshotDataFormat.Binary
         });
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(node.Value, Is.TypeOf<Integer32Value>());
             Assert.That((node.Value as Integer32Value)?.Value, Is.EqualTo((int)value));
-        });
+        }
     }
-    
+
     [Test,
      TestCase(SampleEnum.EntryA),
      TestCase(SampleEnum.EntryB),
@@ -67,13 +67,13 @@ public class TestEnumSerializerGenerator
         {
             Format = SnapshotDataFormat.Textual
         });
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(node.Value, Is.TypeOf<StringValue>());
             Assert.That((node.Value as StringValue)?.Value, Is.EqualTo(value.ToString()));
-        });
+        }
     }
-    
+
     [Test,
      TestCase(SampleEnum.EntryA),
      TestCase(SampleEnum.EntryB),
@@ -89,7 +89,7 @@ public class TestEnumSerializerGenerator
         serializer.LoadSnapshot(ref restored, node);
         Assert.That(restored, Is.EqualTo(value));
     }
-    
+
     [Test,
      TestCase(SampleEnum.EntryA),
      TestCase(SampleEnum.EntryB),

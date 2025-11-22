@@ -16,7 +16,7 @@ public abstract record PrimitiveSchema : SnapshotSchema
     /// <summary>
     /// Non-nullable value types that this schema allows.
     /// </summary>
-    public IReadOnlySet<JsonValueType> AllowedTypes { get; } 
+    public IReadOnlySet<JsonValueType> AllowedTypes { get; }
 
     public override void Generate(ObjectValue schema)
     {
@@ -27,7 +27,9 @@ public abstract record PrimitiveSchema : SnapshotSchema
             case < 1:
                 throw new Exception("Types cannot be empty.");
             case 1:
-                typeNode.BindValue(AllowedTypes.First().ToTypeName());
+                typeNode.BindValue(AllowedTypes.Count > 0
+                    ? AllowedTypes.First().ToTypeName()
+                    : "null");
                 break;
             default:
             {

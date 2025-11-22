@@ -17,11 +17,11 @@ public class TestNullableSnapshotSerializer
         int? value = TestContext.CurrentContext.Random.Next();
         var node = new SnapshotNode();
         serializer.SaveSnapshot(value, node);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(node.Value, Is.TypeOf<Integer32Value>());
             Assert.That(((Integer32Value)node.Value!).Value, Is.EqualTo(value));
-        });
+        }
     }
 
     [Test]
@@ -34,7 +34,10 @@ public class TestNullableSnapshotSerializer
         int? value = null;
         var node = new SnapshotNode();
         serializer.SaveSnapshot(value, node);
-        Assert.Multiple(() => { Assert.That(node.Value, Is.TypeOf<NullValue>()); });
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(node.Value, Is.TypeOf<NullValue>());
+        }
     }
 
     [Test]
@@ -47,11 +50,11 @@ public class TestNullableSnapshotSerializer
         int? value = TestContext.CurrentContext.Random.Next();
         var node = new SnapshotNode();
         serializer.SaveSnapshot(value, node);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(node.Value, Is.TypeOf<Integer32Value>());
             Assert.That(((Integer32Value)node.Value!).Value, Is.EqualTo(value));
-        });
+        }
     }
 
     [Test]
@@ -64,6 +67,9 @@ public class TestNullableSnapshotSerializer
         int? value = null;
         var node = new SnapshotNode();
         serializer.SaveSnapshot(value, node);
-        Assert.Multiple(() => { Assert.That(node.Value, Is.TypeOf<NullValue>()); });
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(node.Value, Is.TypeOf<NullValue>());
+        }
     }
 }

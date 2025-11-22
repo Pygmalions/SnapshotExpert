@@ -8,13 +8,13 @@ namespace SnapshotExpert.Test.Serializers.Primitives.Generators;
 [TestFixture, TestOf(typeof(MatrixSerializerGenerator))]
 public class TestMatrixSerializerGenerator
 {
-    private SerializerContainer _context;
-
     [SetUp]
     public void Initialize()
     {
         _context = new SerializerContainer();
     }
+
+    private SerializerContainer _context;
 
     [Test]
     public void GenerateSerializerInstance()
@@ -29,7 +29,7 @@ public class TestMatrixSerializerGenerator
         var serializer = _context.RequireSerializer<int[,]>();
 
         var node = new SnapshotNode();
-        var targetMatrix = new [,] { { 0, 0, 0 }, { 0, 0, 0 } };
+        var targetMatrix = new[,] { { 0, 0, 0 }, { 0, 0, 0 } };
         var arrays = new int[targetMatrix.GetLength(0)][];
         var arrayLength = targetMatrix.GetLength(1);
         for (var dimension = 0; dimension < 2; dimension++)
@@ -42,11 +42,11 @@ public class TestMatrixSerializerGenerator
                 targetMatrix[dimension, index] = number;
             }
         }
-        
+
         serializer.SaveSnapshot(targetMatrix, node);
 
         Assert.That(node.Value, Is.TypeOf<ArrayValue>());
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             var rootValue = (ArrayValue)node.Value!;
             Assert.That(rootValue[0].Children
@@ -59,9 +59,9 @@ public class TestMatrixSerializerGenerator
                     .OfType<Integer32Value>()
                     .Select(value => value.Value),
                 Is.EquivalentTo(arrays[1]));
-        });
+        }
     }
-    
+
     [Test]
     public void LoadSnapshot_IntoNull()
     {
@@ -82,26 +82,26 @@ public class TestMatrixSerializerGenerator
                 arrayElement.CreateNode().BindValue(number);
             }
         }
-        
+
         serializer.NewInstance(out var deserializedMatrix);
         serializer.LoadSnapshot(ref deserializedMatrix, snapshotNode);
-        
-        Assert.Multiple(() =>
+
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(deserializedMatrix, Is.Not.Null);
             Assert.That(deserializedMatrix.GetLength(0), Is.EqualTo(2));
             for (var dimension = 0; dimension < arrays.Length; ++dimension)
             {
-                Assert.That(deserializedMatrix.GetLength(1), 
+                Assert.That(deserializedMatrix.GetLength(1),
                     Is.EqualTo(arrays[dimension].Length));
                 for (var index = 0; index < arrays[dimension].Length; ++index)
                 {
                     Assert.That(deserializedMatrix[dimension, index], Is.EqualTo(arrays[dimension][index]));
                 }
             }
-        });
+        }
     }
-    
+
     [Test]
     public void LoadSnapshot_IntoDifferentShape()
     {
@@ -122,28 +122,28 @@ public class TestMatrixSerializerGenerator
                 arrayElement.CreateNode().BindValue(number);
             }
         }
-        
+
         var originalMatrix = new int[4, 5];
         var restoredMatrix = originalMatrix;
         serializer.LoadSnapshot(ref restoredMatrix, snapshotNode);
-        
-        Assert.Multiple(() =>
+
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(restoredMatrix, Is.Not.Null);
             Assert.That(restoredMatrix, Is.Not.SameAs(originalMatrix));
             Assert.That(restoredMatrix.GetLength(0), Is.EqualTo(2));
             for (var dimension = 0; dimension < arrays.Length; ++dimension)
             {
-                Assert.That(restoredMatrix.GetLength(1), 
+                Assert.That(restoredMatrix.GetLength(1),
                     Is.EqualTo(arrays[dimension].Length));
                 for (var index = 0; index < arrays[dimension].Length; ++index)
                 {
                     Assert.That(restoredMatrix[dimension, index], Is.EqualTo(arrays[dimension][index]));
                 }
             }
-        });
+        }
     }
-    
+
     [Test]
     public void LoadSnapshot_IntoSameShape()
     {
@@ -164,25 +164,25 @@ public class TestMatrixSerializerGenerator
                 arrayElement.CreateNode().BindValue(number);
             }
         }
-        
+
         var originalMatrix = new int[2, 3];
         var deserializedMatrix = originalMatrix;
         serializer.LoadSnapshot(ref deserializedMatrix, snapshotNode);
-        
-        Assert.Multiple(() =>
+
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(deserializedMatrix, Is.Not.Null);
             Assert.That(deserializedMatrix, Is.SameAs(originalMatrix));
             Assert.That(deserializedMatrix.GetLength(0), Is.EqualTo(2));
             for (var dimension = 0; dimension < arrays.Length; ++dimension)
             {
-                Assert.That(deserializedMatrix.GetLength(1), 
+                Assert.That(deserializedMatrix.GetLength(1),
                     Is.EqualTo(arrays[dimension].Length));
                 for (var index = 0; index < arrays[dimension].Length; ++index)
                 {
                     Assert.That(deserializedMatrix[dimension, index], Is.EqualTo(arrays[dimension][index]));
                 }
             }
-        });
+        }
     }
 }

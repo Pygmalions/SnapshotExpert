@@ -23,13 +23,13 @@ public class TestKeyValuePairSnapshotSerializer
         );
         var node = new SnapshotNode();
         serializer.SaveSnapshot(value, node);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(node.Value, Is.TypeOf<ObjectValue>());
             var objectValue = (ObjectValue)node.Value!;
             Assert.That((objectValue["Key"] as StringValue)?.Value, Is.EqualTo(value.Key));
             Assert.That((objectValue["Value"] as Integer32Value)?.Value, Is.EqualTo(value.Value));
-        });
+        }
     }
 
     [Test]
