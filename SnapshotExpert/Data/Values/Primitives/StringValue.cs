@@ -2,12 +2,12 @@
 
 public class StringValue(string value = "") : PrimitiveValue
 {
-    public override string DebuggerString => $"(String) \"{Value}\"";
+    public override string DebuggerString => $"\"{Value}\"";
 
     public string Value { get; set; } = value;
-    
+
     public static implicit operator string(StringValue value) => value.Value;
-    
+
     public static implicit operator StringValue(string value) => new(value);
 
     public override bool ContentEquals(SnapshotValue? value)

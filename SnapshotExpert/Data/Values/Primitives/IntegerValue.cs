@@ -3,18 +3,9 @@
 public class Integer32Value(int value = 0) : PrimitiveValue,
     INumberValue
 {
-    public override string DebuggerString => $"(Integer32) {Value}";
+    public override string DebuggerString => $"{Value}";
 
     public int Value { get; set; } = value;
-
-    public override bool ContentEquals(SnapshotValue? value)
-        => value is IInteger32Value other && Value == other.Value;
-
-    public override int GetContentHashCode() => Value.GetHashCode();
-
-    public static implicit operator int(Integer32Value value) => value.Value;
-
-    public static implicit operator Integer32Value(int value) => new(value);
 
     long IInteger64Value.Value
     {
@@ -33,6 +24,15 @@ public class Integer32Value(int value = 0) : PrimitiveValue,
         get => Value;
         set => Value = decimal.ToInt32(value);
     }
+
+    public override bool ContentEquals(SnapshotValue? value)
+        => value is IInteger32Value other && Value == other.Value;
+
+    public override int GetContentHashCode() => Value.GetHashCode();
+
+    public static implicit operator int(Integer32Value value) => value.Value;
+
+    public static implicit operator Integer32Value(int value) => new(value);
 }
 
 public class Integer64Value(long value = 0) : PrimitiveValue, INumberValue
@@ -41,15 +41,6 @@ public class Integer64Value(long value = 0) : PrimitiveValue, INumberValue
 
     public long Value { get; set; } = value;
 
-    public override bool ContentEquals(SnapshotValue? value)
-        => value is IInteger64Value other && Value == other.Value;
-
-    public override int GetContentHashCode() => Value.GetHashCode();
-
-    public static implicit operator long(Integer64Value value) => value.Value;
-
-    public static implicit operator Integer64Value(long value) => new(value);
-    
     int IInteger32Value.Value
     {
         get => (int)Value;
@@ -67,4 +58,13 @@ public class Integer64Value(long value = 0) : PrimitiveValue, INumberValue
         get => Value;
         set => Value = decimal.ToInt64(value);
     }
+
+    public override bool ContentEquals(SnapshotValue? value)
+        => value is IInteger64Value other && Value == other.Value;
+
+    public override int GetContentHashCode() => Value.GetHashCode();
+
+    public static implicit operator long(Integer64Value value) => value.Value;
+
+    public static implicit operator Integer64Value(long value) => new(value);
 }

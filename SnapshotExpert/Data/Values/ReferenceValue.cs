@@ -5,7 +5,9 @@
 /// </summary>
 public abstract class ReferenceValue : SnapshotValue
 {
-    internal ReferenceValue() {}
+    internal ReferenceValue()
+    {
+    }
 }
 
 /// <summary>
@@ -14,9 +16,11 @@ public abstract class ReferenceValue : SnapshotValue
 /// <param name="reference">Referenced node in the same snapshot.</param>
 public class InternalReferenceValue(SnapshotNode? reference = null) : ReferenceValue
 {
-    public override string DebuggerString => $"(InternalReference) '{Reference?.Path ?? "null"}'";
-    
+    public override string DebuggerString => $"InternalReference '{Reference?.Path ?? "null"}'";
+
     public SnapshotNode? Reference { get; set; } = reference;
+
+    private static int DefaultContentHashCode { get; } = typeof(InternalReferenceValue).GetHashCode();
 
     public override bool ContentEquals(SnapshotValue? value)
     {
@@ -24,8 +28,6 @@ public class InternalReferenceValue(SnapshotNode? reference = null) : ReferenceV
             return false;
         return Reference == other.Reference;
     }
-    
-    private static int DefaultContentHashCode { get; } = typeof(InternalReferenceValue).GetHashCode();
 
     public override int GetContentHashCode() => Reference?.GetHashCode() ?? DefaultContentHashCode;
 }
@@ -38,7 +40,7 @@ public class ExternalReferenceValue(string? identifier = null) : ReferenceValue
 {
     private static int DefaultContentHashCode { get; } = typeof(ExternalReferenceValue).GetHashCode();
 
-    public override string DebuggerString => $"(ExternalReference) '{Identifier ?? "null"}'";
+    public override string DebuggerString => $"ExternalReference '{Identifier ?? "null"}'";
 
     public string? Identifier { get; set; } = identifier;
 
@@ -48,6 +50,6 @@ public class ExternalReferenceValue(string? identifier = null) : ReferenceValue
             return false;
         return Identifier == other.Identifier;
     }
-    
+
     public override int GetContentHashCode() => Identifier?.GetHashCode() ?? DefaultContentHashCode;
 }

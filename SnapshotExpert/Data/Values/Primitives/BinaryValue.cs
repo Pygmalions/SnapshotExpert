@@ -7,12 +7,50 @@ public class BinaryValue(
     BinaryValue.BinaryContentType contentType = BinaryValue.BinaryContentType.Unknown)
     : PrimitiveValue
 {
+    public enum BinaryContentType
+    {
+        /// <summary>
+        /// Semantic meaning of this binary data is unknown or customized by users.
+        /// </summary>
+        Unknown,
+
+        /// <summary>
+        /// This binary data is a hash value (e.g. MD5).
+        /// </summary>
+        Hash,
+
+        /// <summary>
+        /// This binary data is a global unique identifier.
+        /// </summary>
+        Guid,
+
+        /// <summary>
+        /// This binary represents a vector.
+        /// </summary>
+        Vector,
+
+        /// <summary>
+        /// This binary represents a function (e.g. compiled code).
+        /// </summary>
+        Function,
+
+        /// <summary>
+        /// This binary represents encrypted data.
+        /// </summary>
+        Encrypted,
+
+        /// <summary>
+        /// This binary represents sensitive data.
+        /// </summary>
+        Sensitive,
+    }
+
     public BinaryValue(Guid value) :
         this(GuidConverter.ToBytes(value, GuidRepresentation.Standard), BinaryContentType.Guid)
     {
     }
 
-    public override string DebuggerString => $"(Binary) {ContentType} - {Value.Length} bytes)";
+    public override string DebuggerString => $"{ContentType} ({Value.Length} bytes)";
 
     public byte[] Value { get; set; } = value ?? [];
 
@@ -52,42 +90,4 @@ public class BinaryValue(
 
     public static implicit operator BinaryValue(Guid value) =>
         new(GuidConverter.ToBytes(value, GuidRepresentation.Standard), BinaryContentType.Guid);
-
-    public enum BinaryContentType
-    {
-        /// <summary>
-        /// Semantic meaning of this binary data is unknown or customized by users.
-        /// </summary>
-        Unknown,
-
-        /// <summary>
-        /// This binary data is a hash value (e.g. MD5).
-        /// </summary>
-        Hash,
-
-        /// <summary>
-        /// This binary data is a global unique identifier.
-        /// </summary>
-        Guid,
-
-        /// <summary>
-        /// This binary represents a vector.
-        /// </summary>
-        Vector,
-
-        /// <summary>
-        /// This binary represents a function (e.g. compiled code).
-        /// </summary>
-        Function,
-
-        /// <summary>
-        /// This binary represents encrypted data.
-        /// </summary>
-        Encrypted,
-
-        /// <summary>
-        /// This binary represents sensitive data.
-        /// </summary>
-        Sensitive,
-    }
 }

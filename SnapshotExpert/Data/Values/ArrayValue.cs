@@ -2,7 +2,7 @@
 
 namespace SnapshotExpert.Data.Values;
 
-public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<SnapshotValue>
+public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<SnapshotNode>
 {
     private readonly List<SnapshotNode> _nodes = new(capacity);
 
@@ -16,7 +16,7 @@ public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<S
             CreateNode().Value = item;
     }
 
-    public override IEnumerable<SnapshotNode> DeclaredNodes => _nodes;
+    internal override IEnumerable<SnapshotNode> DeclaredNodes => _nodes;
 
     public override string DebuggerString => "Array";
 
@@ -31,18 +31,27 @@ public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<S
     /// </summary>
     public int Count => _nodes.Count;
 
-    public IEnumerator<SnapshotValue> GetEnumerator()
-        => _nodes.Select(node => node.Value!).GetEnumerator();
+    public IEnumerator<SnapshotNode> GetEnumerator()
+        => _nodes.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator() 
+    IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
 
-    public override SnapshotNode? GetDeclaredNode(string name)
+    internal override SnapshotNode? GetDeclaredNode(string name)
     {
         if (int.TryParse(name, out var index) && index >= 0 && index < _nodes.Count)
             return _nodes[index];
         return null;
     }
+
+    public SnapshotNode? GetNode(string index)
+    {
+        if (int.TryParse(index, out var number) && number >= 0 && number < _nodes.Count)
+            return _nodes[number];
+        return null;
+    }
+
+    public SnapshotNode? GetNode(int index) => index < Count ? _nodes[index] : null;
 
     /// <summary>
     /// Create a node in the content of this array value.
@@ -82,7 +91,7 @@ public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<S
         foreach (var pair in _nodes.Index())
             pair.Item.Name = pair.Index.ToString();
     }
-    
+
     /// <summary>
     /// Add a snapshot value to the end of this array value.
     /// </summary>
@@ -95,8 +104,8 @@ public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<S
     /// </summary>
     /// <param name="value">Value to compare.</param>
     public void Remove(SnapshotValue value)
-        => _nodes.RemoveAll(node => SnapshotValue.ContentEquals(node.Value, value));
-    
+        => _nodes.RemoveAll(node => ContentEquals(node.Value, value));
+
     /// <summary>
     /// Compare the content of this array value with that of another array value.
     /// These contents are considered as equal when satisfying all requirements: <br/>
@@ -120,6 +129,7 @@ public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<S
             if (!node.Value.ContentEquals(otherNode.Value))
                 return false;
         }
+
         return true;
     }
 

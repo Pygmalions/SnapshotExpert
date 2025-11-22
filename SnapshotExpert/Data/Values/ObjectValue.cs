@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SnapshotExpert.Data.Values;
 
-public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, SnapshotValue?>>
+public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, SnapshotNode>>
 {
     private readonly OrderedDictionary<string, SnapshotNode> _nodes = [];
 
@@ -27,7 +27,7 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
     {
     }
 
-    public override IEnumerable<SnapshotNode> DeclaredNodes => _nodes.Values;
+    internal override IEnumerable<SnapshotNode> DeclaredNodes => _nodes.Values;
 
     public override string DebuggerString => "Object";
 
@@ -38,21 +38,25 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
 
     public SnapshotValue this[string name]
     {
-        get => GetDeclaredNode(name)?.Value ?? 
+        get => GetNode(name)?.Value ??
                throw new KeyNotFoundException($"Cannot find node '{name}' in this object value.");
-        set => (GetDeclaredNode(name) ?? CreateNode(name)).Value = value;
+        set => (GetNode(name) ?? CreateNode(name)).Value = value;
     }
 
-    public IEnumerator<KeyValuePair<string, SnapshotValue?>> GetEnumerator()
-        => _nodes
-            .Select(pair => new KeyValuePair<string, SnapshotValue?>(
-                pair.Key, pair.Value?.Value))
-            .GetEnumerator();
+    public IEnumerator<KeyValuePair<string, SnapshotNode>> GetEnumerator()
+        => _nodes.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => _nodes.Values.GetEnumerator();
 
-    public override SnapshotNode? GetDeclaredNode(string name)
+    internal override SnapshotNode? GetDeclaredNode(string name)
         => _nodes.GetValueOrDefault(name);
+
+    public SnapshotNode? GetNode(int index) => index < Count ? _nodes.GetAt(index).Value : null;
+
+    public SnapshotNode? GetNode(string name) => _nodes.GetValueOrDefault(name);
+
+    public bool TryGetNode(string name, [MaybeNullWhen(false)] out SnapshotNode node)
+        => _nodes.TryGetValue(name, out node);
 
     /// <summary>
     /// Create a node at the specified index in the content of this value.
@@ -115,7 +119,7 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
     /// <returns>True if the node is found and deleted, otherwise false.</returns>
     public bool Remove(string name)
         => _nodes.Remove(name, out _);
-    
+
     /// <summary>
     /// Delete the node with the specified name from the content of this value.
     /// </summary>
@@ -139,13 +143,13 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
                 $"Node with name '{node.Name}' already exists in this object value.",
                 nameof(node));
     }
-    
+
     /// <summary>
     /// Remove the snapshot from this object value.
     /// </summary>
     /// <param name="node">Node to remove.</param>
     /// <returns></returns>
-    public bool Remove(SnapshotNode node) 
+    public bool Remove(SnapshotNode node)
         => _nodes.Remove(node.Name);
 
     /// <summary>
@@ -191,7 +195,7 @@ public static class ObjectValueExtensions
     /// <param name="name">Name of the node to get.</param>
     public static SnapshotNode RequireNode(this ObjectValue value, string name)
     {
-        if (value.GetDeclaredNode(name) is { } node)
+        if (value.GetNode(name) is { } node)
             return node;
         throw new KeyNotFoundException(
             $"Cannot find the required node '{name}' in this object value.");
