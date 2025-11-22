@@ -202,7 +202,7 @@ public static class SnapshotBsonReaderExtensions
             return node;
         }
 
-        public static SnapshotNode ParseFromString(string json)
+        public static SnapshotNode ParseFromJsonText(string json)
         {
             using var reader = new JsonReader(json);
             return Parse(reader);

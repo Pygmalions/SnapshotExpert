@@ -7,6 +7,73 @@ namespace SnapshotExpert.Data.IO;
 
 public static class SnapshotBsonWriterExtensions
 {
+    private static void DumpNodeMetadata(
+        IBsonWriter writer, SnapshotNode node,
+        bool withType = true, bool withMode = true)
+    {
+        if (withType && node.Type != null)
+        {
+            if (node.Type.AssemblyQualifiedName is not { } typeString)
+                throw new Exception(
+                    $"Failed to write node: associated type '{node.Type}' has no assembly qualified name.");
+            typeString = string.Join(',', typeString.Split(',')[..2]);
+            writer.WriteName(SnapshotNode.Keywords.Type);
+            writer.WriteString(typeString);
+        }
+
+        if (withMode && node.Mode != SnapshotModeType.Patching)
+        {
+            writer.WriteName(SnapshotNode.Keywords.Mode);
+            writer.WriteString(node.Mode.ToString());
+        }
+    }
+
+    private static void WritePrimitiveValue(IBsonWriter writer, PrimitiveValue target)
+    {
+        switch (target)
+        {
+            case NullValue:
+                writer.WriteNull();
+                break;
+            case BooleanValue booleanValue:
+                writer.WriteBoolean(booleanValue.Value);
+                break;
+            case StringValue stringValue:
+                writer.WriteString(stringValue.Value);
+                break;
+            case BinaryValue binaryValue:
+                writer.WriteBinaryData(new BsonBinaryData(binaryValue.Value, binaryValue.ContentType switch
+                {
+                    BinaryValue.BinaryContentType.Unknown => BsonBinarySubType.UserDefined,
+                    BinaryValue.BinaryContentType.Hash => BsonBinarySubType.MD5,
+                    BinaryValue.BinaryContentType.Guid => BsonBinarySubType.UuidStandard,
+                    BinaryValue.BinaryContentType.Vector => BsonBinarySubType.Vector,
+                    BinaryValue.BinaryContentType.Function => BsonBinarySubType.Function,
+                    BinaryValue.BinaryContentType.Encrypted => BsonBinarySubType.Encrypted,
+                    BinaryValue.BinaryContentType.Sensitive => BsonBinarySubType.Sensitive,
+                    _ => throw new Exception($"Unsupported binary content type: {binaryValue.ContentType}.")
+                }));
+                break;
+            case Integer32Value integer32Value:
+                writer.WriteInt32(integer32Value.Value);
+                break;
+            case Integer64Value integer64Value:
+                writer.WriteInt64(integer64Value.Value);
+                break;
+            case Float64Value float64Value:
+                writer.WriteDouble(float64Value.Value);
+                break;
+            case DecimalValue decimalValue:
+                writer.WriteDecimal128(decimalValue.Value);
+                break;
+            case DateTimeValue dateTimeValue:
+                writer.WriteDateTime(dateTimeValue.ToUtcTime.Millisecond);
+                break;
+            default:
+                throw new Exception($"Unsupported primitive self.Value type: '{target.GetType()}'.");
+        }
+    }
+
     extension(SnapshotNode self)
     {
         /// <summary>
@@ -32,12 +99,10 @@ public static class SnapshotBsonWriterExtensions
                     if (hasValueMetadata)
                     {
                         writer.WriteStartDocument();
-                        WriteNodeMetadata(withMode: false);
+                        DumpNodeMetadata(writer, self, withMode: false);
                         writer.WriteName(SnapshotNode.Keywords.Value);
                     }
-
-                    WritePrimitiveValue(primitive);
-
+                    WritePrimitiveValue(writer, primitive);
                     if (hasValueMetadata)
                         writer.WriteEndDocument();
                     return;
@@ -62,18 +127,16 @@ public static class SnapshotBsonWriterExtensions
                         default:
                             throw new Exception($"Unsupported reference self.Value type '{reference.GetType()}'.");
                     }
-
                     writer.WriteEndDocument();
                     break;
                 case ObjectValue document:
                     writer.WriteStartDocument();
-                    WriteNodeMetadata();
+                    DumpNodeMetadata(writer, self);
                     foreach (var child in document.DeclaredNodes)
                     {
                         writer.WriteName(child.Name);
                         child.Dump(writer);
                     }
-
                     writer.WriteEndDocument();
                     break;
                 case ArrayValue array:
@@ -81,97 +144,22 @@ public static class SnapshotBsonWriterExtensions
                     if (hasArrayMetadata)
                     {
                         writer.WriteStartDocument();
-                        WriteNodeMetadata();
+                        DumpNodeMetadata(writer, self);
                         writer.WriteName(SnapshotNode.Keywords.Value);
                     }
-
                     writer.WriteStartArray();
                     foreach (var child in array.DeclaredNodes)
-                    {
                         child.Dump(writer);
-                    }
-
                     writer.WriteEndArray();
-
                     if (hasArrayMetadata)
                         writer.WriteEndDocument();
                     break;
                 default:
                     throw new Exception($"Unsupported self.Value type '{self.Value.GetType()}'.");
             }
-
-            return;
-
-            void WriteNodeMetadata(bool withType = true, bool withMode = true)
-            {
-                if (withType && self.Type != null)
-                {
-                    if (self.Type.AssemblyQualifiedName is not { } typeString)
-                        throw new Exception(
-                            $"Failed to write node: associated type '{self.Type}' has no assembly qualified name.");
-                    typeString = string.Join(',', typeString.Split(',')[..2]);
-                    writer.WriteName(SnapshotNode.Keywords.Type);
-                    writer.WriteString(typeString);
-                }
-
-                if (withMode && self.Mode != SnapshotModeType.Patching)
-                {
-                    writer.WriteName(SnapshotNode.Keywords.Mode);
-                    writer.WriteString(self.Mode.ToString());
-                }
-            }
-
-            void WritePrimitiveValue(PrimitiveValue target)
-            {
-                switch (target)
-                {
-                    case NullValue:
-                        writer.WriteNull();
-                        break;
-                    case BooleanValue booleanValue:
-                        writer.WriteBoolean(booleanValue.Value);
-                        break;
-                    case StringValue stringValue:
-                        writer.WriteString(stringValue.Value);
-                        break;
-                    case BinaryValue binaryValue:
-                        writer.WriteBinaryData(new BsonBinaryData(binaryValue.Value, binaryValue.ContentType switch
-                        {
-                            BinaryValue.BinaryContentType.Unknown => BsonBinarySubType.UserDefined,
-                            BinaryValue.BinaryContentType.Hash => BsonBinarySubType.MD5,
-                            BinaryValue.BinaryContentType.Guid => BsonBinarySubType.UuidStandard,
-                            BinaryValue.BinaryContentType.Vector => BsonBinarySubType.Vector,
-                            BinaryValue.BinaryContentType.Function => BsonBinarySubType.Function,
-                            BinaryValue.BinaryContentType.Encrypted => BsonBinarySubType.Encrypted,
-                            BinaryValue.BinaryContentType.Sensitive => BsonBinarySubType.Sensitive,
-                            _ => throw new Exception($"Unsupported binary content type: {binaryValue.ContentType}.")
-                        }));
-                        break;
-                    case Integer32Value integer32Value:
-                        writer.WriteInt32(integer32Value.Value);
-                        break;
-                    case Integer64Value integer64Value:
-                        writer.WriteInt64(integer64Value.Value);
-                        break;
-                    case Float64Value float64Value:
-                        writer.WriteDouble(float64Value.Value);
-                        break;
-                    case DecimalValue decimalValue:
-                        writer.WriteDecimal128(decimalValue.Value);
-                        break;
-                    case DateTimeValue dateTimeValue:
-                        writer.WriteDateTime(dateTimeValue.ToUtcTime.Millisecond);
-                        break;
-                    default:
-                        throw new Exception($"Unsupported primitive self.Value type: '{target.GetType()}'.");
-                }
-            }
         }
 
-        public string DumpToString()
-            => self.ToJson();
-
-        public string DumpToString(bool indent)
+        public string DumpToJsonText(bool indent)
             => self.ToJson(new JsonWriterSettings { Indent = indent });
 
         /// <summary>
@@ -179,7 +167,7 @@ public static class SnapshotBsonWriterExtensions
         /// </summary>
         /// <param name="settings">Settings for the JSON writer.</param>
         /// <returns>JSON representation of this snapshot node tree.</returns>
-        public string DumpToJson(JsonWriterSettings? settings = null)
+        public string DumpToJsonText(JsonWriterSettings? settings = null)
         {
             if (self.Value == null)
                 throw new InvalidOperationException(
