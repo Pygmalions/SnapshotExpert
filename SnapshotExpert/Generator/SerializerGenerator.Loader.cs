@@ -71,7 +71,7 @@ public partial class SerializerGenerator
         public void Generate(FieldInfo field, MemberInfo metadata)
         {
             _variableObjectValue.Invoke(
-                    target => target.GetDeclaredNode(Any<string>.Value),
+                    target => target.GetNode(Any<string>.Value),
                     [_method.Value(metadata.Name)])
                 .ToSymbol(_variableMemberNode);
 

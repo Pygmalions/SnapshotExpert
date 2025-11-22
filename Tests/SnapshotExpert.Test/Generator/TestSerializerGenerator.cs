@@ -289,7 +289,7 @@ public class TestSerializerGenerator
                 Is.EqualTo(instance.PrivateField));
             Assert.That((value["Field"] as Integer32Value)?.Value, 
                 Is.EqualTo(instance.Field));
-            Assert.That(value.GetDeclaredNode(nameof(StubClassWithTransientMembers.Property)), Is.Null);
+            Assert.That(value.GetNode(nameof(StubClassWithTransientMembers.Property)), Is.Null);
         });
     }
 }

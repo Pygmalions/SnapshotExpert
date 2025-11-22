@@ -126,7 +126,7 @@ public class CallHandlerGenerator
         foreach (var (index, parameter) in targetMethod.GetParameters().Index())
         {
             var variableArgumentNode = argumentSerializedArguments.Invoke(
-                target => target.GetDeclaredNode(Any<string>.Value),
+                target => target.GetNode(Any<string>.Value),
                 [method.Value(parameter.Name ?? index.ToString())]);
 
             var labelContinue = method.DefineLabel();

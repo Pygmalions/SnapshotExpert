@@ -14,19 +14,19 @@ public abstract partial class SnapshotValue : ISnapshotConvertible
     /// By assigning this value to the <see cref="SnapshotNode.Value"/> property,
     /// the value is bound to the node.
     /// </summary>
-    public SnapshotNode? DeclaringNode { get; internal set; }
+    internal SnapshotNode? DeclaringNode { get; set; }
 
     /// <summary>
     /// Nodes declared by this value.
     /// </summary>
-    public virtual IEnumerable<SnapshotNode> DeclaredNodes => [];
+    internal virtual IEnumerable<SnapshotNode> DeclaredNodes => [];
 
     /// <summary>
     /// Get the declared node with the specified name.
     /// </summary>
     /// <param name="name">Name of the node declared by this value.</param>
     /// <returns>Located node, or null if not found.</returns>
-    public virtual SnapshotNode? GetDeclaredNode(string name) => null;
+    internal virtual SnapshotNode? GetDeclaredNode(string name) => null;
     
     /// <summary>
     /// Human-readable string for this node to display in the debugger.
