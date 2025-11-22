@@ -51,21 +51,37 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
     internal override SnapshotNode? GetDeclaredNode(string name)
         => _nodes.GetValueOrDefault(name);
 
+    /// <summary>
+    /// Check if this object value contains a node with the specified name.
+    /// </summary>
+    /// <param name="name">Name of the node.</param>
+    /// <returns>
+    /// True if a node with the specified name exists in this object value,
+    /// otherwise false.
+    /// </returns>
+    public bool Contains(string name) => _nodes.ContainsKey(name);
+
     public SnapshotNode? GetNode(int index) => index < Count ? _nodes.GetAt(index).Value : null;
 
     public SnapshotNode? GetNode(string name) => _nodes.GetValueOrDefault(name);
 
+    /// <summary>
+    /// Try to get the node with the specified name from this object value.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="node"></param>
+    /// <returns></returns>
     public bool TryGetNode(string name, [MaybeNullWhen(false)] out SnapshotNode node)
         => _nodes.TryGetValue(name, out node);
 
     /// <summary>
-    /// Create a node at the specified index in the content of this value.
+    /// Create a node at the specified index in this object value.
     /// </summary>
     /// <param name="index">Index to create this node at.</param>
     /// <param name="name">Name for the created node to use.</param>
     /// <returns>Created node.</returns>
     /// <exception cref="ArgumentException">
-    /// Throw if a node with the same name already exists in the content of this value.
+    /// Throw if a node with the same name already exists in this object value.
     /// </exception>
     public SnapshotNode InsertNode(int index, string name)
     {
@@ -79,12 +95,12 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
     }
 
     /// <summary>
-    /// Create a node in the content of this value.
+    /// Create a node in this object value.
     /// </summary>
     /// <param name="name">Name for the created node to use.</param>
     /// <returns>Created node.</returns>
     /// <exception cref="ArgumentException">
-    /// Throw if a node with the same name already exists in the content of this value.
+    /// Throw if a node with the same name already exists in this object value.
     /// </exception>
     public SnapshotNode CreateNode(string name)
     {
@@ -97,13 +113,13 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
     }
 
     /// <summary>
-    /// Create a node in the content of this value.
+    /// Create a node in this object value with the specified value.
     /// </summary>
     /// <param name="name">Name for the created node to use.</param>
     /// <param name="value">Value to assign to the created node.</param>
     /// <returns>Created node.</returns>
     /// <exception cref="ArgumentException">
-    /// Throw if a node with the same name already exists in the content of this value.
+    /// Throw if a node with the same name already exists in this object value.
     /// </exception>
     public SnapshotNode CreateNode(string name, SnapshotValue value)
     {
@@ -113,7 +129,7 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
     }
 
     /// <summary>
-    /// Delete the node with the specified name from the content of this value.
+    /// Remove the node with the specified name from the content of this value.
     /// </summary>
     /// <param name="name">Name of the node to delete.</param>
     /// <returns>True if the node is found and deleted, otherwise false.</returns>
@@ -121,7 +137,7 @@ public class ObjectValue() : SnapshotValue, IEnumerable<KeyValuePair<string, Sna
         => _nodes.Remove(name, out _);
 
     /// <summary>
-    /// Delete the node with the specified name from the content of this value.
+    /// Remove the node with the specified name from the content of this value.
     /// </summary>
     /// <param name="name">Name of the node to delete.</param>
     /// <param name="node">Removed node with the specified name.</param>

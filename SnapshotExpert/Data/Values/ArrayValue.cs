@@ -54,7 +54,7 @@ public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<S
     public SnapshotNode? GetNode(int index) => index < Count ? _nodes[index] : null;
 
     /// <summary>
-    /// Create a node in the content of this array value.
+    /// Create a node at the end of this array value.
     /// </summary>
     /// <returns>Created node.</returns>
     public SnapshotNode CreateNode()
@@ -65,7 +65,7 @@ public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<S
     }
 
     /// <summary>
-    /// Create a node in the content of this array value.
+    /// Create a node at the end of this array value with the specified value.
     /// </summary>
     /// <param name="value">Value to assign to the created node.</param>
     /// <returns>Created node.</returns>
@@ -77,7 +77,7 @@ public class ArrayValue(int capacity = 0) : SnapshotValue, IReadOnlyCollection<S
     }
 
     /// <summary>
-    /// Delete the node with the specified name from the content of this value.
+    /// Delete the node at the specified index from this array value.
     /// </summary>
     /// <param name="index">Index of the node to delete.</param>
     /// <returns>True if the node is found and deleted, otherwise false.</returns>
