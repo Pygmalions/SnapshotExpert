@@ -12,12 +12,12 @@ public record ObjectSchema() : PrimitiveSchema(JsonValueType.Object)
     /// <summary>
     /// Optional properties.
     /// </summary>
-    public OrderedDictionary<string, SnapshotSchema>? OptionalProperties { get; init; }
+    public IReadOnlyDictionary<string, SnapshotSchema>? OptionalProperties { get; init; }
 
     /// <summary>
     /// Required properties.
     /// </summary>
-    public OrderedDictionary<string, SnapshotSchema>? RequiredProperties { get; init; }
+    public IReadOnlyDictionary<string, SnapshotSchema>? RequiredProperties { get; init; }
 
     /// <summary>
     /// Schema for additional properties. If null, additional properties are not allowed.

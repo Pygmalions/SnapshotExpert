@@ -4,6 +4,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+        <Version>0.3.0-dev11221815</Version>
         <Title>Snapshot Expert</Title>
         <Authors>Pygmalions</Authors>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -13,8 +15,6 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>Serialization BSON JSON Automated-Serialization Serializer-Generator IL-Emitting</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <LangVersion>preview</LangVersion>
-        <Version>0.3.0-dev11221757</Version>
     </PropertyGroup>
 
     <ItemGroup>
