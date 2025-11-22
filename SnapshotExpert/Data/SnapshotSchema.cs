@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
+using SnapshotExpert.Data.IO;
 using SnapshotExpert.Data.Values;
 using SnapshotExpert.Data.Values.Primitives;
 
@@ -105,24 +106,34 @@ public abstract record SnapshotSchema
 
 public static class SchemaModelExtensions
 {
-    public static BsonDocument ToBsonDocument(this SnapshotSchema model)
+    extension(SnapshotSchema model)
     {
-        var node = new SnapshotNode();
-        model.Generate(node.AssignValue(new ObjectValue()));
-        return node.ToBsonDocument();
-    }
+        public ObjectValue DumpToSnapshotValue()
+        {
+            var value = new ObjectValue();
+            model.Generate(value);
+            return value;
+        }
 
-    public static string ToJson(this SnapshotSchema model, JsonWriterSettings? settings = null)
-    {
-        var node = new SnapshotNode();
-        model.Generate(node.AssignValue(new ObjectValue()));
-        return node.ToJson(settings ?? new JsonWriterSettings { Indent = true });
-    }
+        public string DumpToJsonText(JsonWriterSettings? settings = null)
+        {
+            var node = new SnapshotNode();
+            model.Generate(node.AssignValue(new ObjectValue()));
+            return node.DumpToJsonText(settings ?? new JsonWriterSettings { Indent = true });
+        }
 
-    public static byte[] ToBson(this SnapshotSchema model)
-    {
-        var node = new SnapshotNode();
-        model.Generate(node.AssignValue(new ObjectValue()));
-        return node.ToBson();
+        public BsonDocument DumpToBsonDocument()
+        {
+            var node = new SnapshotNode();
+            model.Generate(node.AssignValue(new ObjectValue()));
+            return node.DumpToBsonDocument();
+        }
+
+        public byte[] DumpToBsonBytes()
+        {
+            var node = new SnapshotNode();
+            model.Generate(node.AssignValue(new ObjectValue()));
+            return node.DumpToBsonBytes();
+        }
     }
 }
