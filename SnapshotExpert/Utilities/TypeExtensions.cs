@@ -2,11 +2,15 @@
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.ObjectPool;
 
 namespace SnapshotExpert.Utilities;
 
 internal static partial class TypeExtensions
 {
+    private static readonly ObjectPool<StringBuilder> PooledStringBuilders
+        = new DefaultObjectPool<StringBuilder>(new StringBuilderPooledObjectPolicy());
+
     /// <summary>
     /// Get the backing field of the specified property.
     /// </summary>
@@ -69,9 +73,46 @@ internal static partial class TypeExtensions
                 $"Unsupported member type {member.MemberType}.", nameof(member))
         };
     }
-    
+
     extension(Type self)
     {
+        public string MinimalAssemblyQualifiedName
+        {
+            get
+            {
+                if (self.FullName == null)
+                    throw new InvalidOperationException("This type doesn't have a namespace qualified name.");
+
+                if (!self.IsGenericType || self.IsGenericTypeDefinition)
+                {
+                    var fullName = self.FullName;
+                    if (self.Assembly.GetName().Name is { } assemblyName)
+                        return $"{fullName}, {assemblyName}";
+                    return fullName;
+                }
+
+                var builder = PooledStringBuilders.Get();
+                builder.Append(self.Namespace);
+                builder.Append('.');
+                builder.Append(self.Name);
+                builder.Append('[');
+                var arguments = self.GetGenericArguments();
+                foreach (var (index, argument) in arguments.Index())
+                {
+                    builder.Append('[');
+                    builder.Append(argument.MinimalAssemblyQualifiedName);
+                    builder.Append(']');
+                    if (index < arguments.Length - 1)
+                        builder.Append(',');
+                }
+
+                builder.Append(']');
+                var result = builder.ToString();
+                PooledStringBuilders.Return(builder);
+                return result;
+            }
+        }
+
         /// <summary>
         /// Check if this type matches the target type: <br/>
         /// - This type is equal to the target type. <br/>
@@ -241,9 +282,10 @@ internal static partial class TypeExtensions
             if (postfix != null)
                 builder.Append(postfix);
 
-            if (!self.IsGenericType) return 
-                builder.ToString();
-        
+            if (!self.IsGenericType)
+                return
+                    builder.ToString();
+
             foreach (var genericArgument in self.GetGenericArguments())
             {
                 builder.Append('`');

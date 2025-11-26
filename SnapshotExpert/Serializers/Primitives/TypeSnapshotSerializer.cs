@@ -1,6 +1,7 @@
 ﻿using SnapshotExpert.Data;
 using SnapshotExpert.Data.Schemas.Primitives;
 using SnapshotExpert.Data.Values.Primitives;
+using SnapshotExpert.Utilities;
 
 namespace SnapshotExpert.Serializers.Primitives;
 
@@ -18,7 +19,7 @@ public class TypeSnapshotSerializer : SnapshotSerializer<Type>
     }
 
     public override void NewInstance(out Type instance) => instance = null!;
-    
+
     public override void SaveSnapshot(in Type target, SnapshotNode snapshot, SnapshotWritingScope scope)
     {
         if (target == null!)
@@ -26,10 +27,10 @@ public class TypeSnapshotSerializer : SnapshotSerializer<Type>
             snapshot.Value = new NullValue();
             return;
         }
-        if (target.AssemblyQualifiedName is not { } typeString)
+
+        if (target.MinimalAssemblyQualifiedName is not { } typeString)
             throw new Exception(
                 $"Failed to save snapshot: Type '{target}' has no assembly qualified name.");
-        typeString = string.Join(',', typeString.Split(',')[..2]);
         snapshot.Value = new StringValue(typeString);
     }
 
