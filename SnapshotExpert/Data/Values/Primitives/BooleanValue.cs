@@ -1,6 +1,6 @@
 ﻿namespace SnapshotExpert.Data.Values.Primitives;
 
-public class BooleanValue(bool value = false) : PrimitiveValue
+public class BooleanValue(bool value) : PrimitiveValue
 {
     public override string DebuggerString => $"{Value}";
 
