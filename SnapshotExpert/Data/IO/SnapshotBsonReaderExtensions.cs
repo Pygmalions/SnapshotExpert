@@ -9,6 +9,71 @@ public static class SnapshotBsonReaderExtensions
 {
     extension(SnapshotNode)
     {
+        private static void ParseDocument(SnapshotNode node, SnapshotNode root, IBsonReader reader)
+        {
+            reader.ReadStartDocument();
+            ObjectValue? document = null;
+            var isInHeader = true;
+            while (reader.ReadBsonType() != BsonType.EndOfDocument)
+            {
+                var name = reader.ReadName();
+
+                if (isInHeader)
+                {
+                    switch (name)
+                    {
+                        case SnapshotNode.Keywords.Reference:
+                            if (reader.CurrentBsonType != BsonType.String)
+                                throw new Exception("Failed to parse node: invalid $ref field type.");
+                            var referenceString = reader.ReadString();
+                            if (root.Locate(referenceString) is { } referencedNode)
+                                node.Value = new InternalReferenceValue(referencedNode);
+                            else
+                                // If the reference string cannot be resolved as a path,
+                                // then treat it as the identifier of an external reference.
+                                node.Value = new ExternalReferenceValue(referenceString);
+                            continue;
+
+                        case SnapshotNode.Keywords.Type:
+                            if (reader.CurrentBsonType != BsonType.String)
+                                throw new Exception("Failed to parse node: invalid $type field type.");
+                            var typeString = reader.ReadString();
+                            node.Type = Type.GetType(typeString) ??
+                                        throw new Exception(
+                                            $"Failed to parse node: cannot resolve type '{typeString}'.");
+                            continue;
+
+                        case SnapshotNode.Keywords.Mode:
+                            if (reader.CurrentBsonType != BsonType.String)
+                                throw new Exception("Failed to parse node: invalid $mode field type.");
+                            var modeString = reader.ReadString();
+                            if (!Enum.TryParse<SnapshotModeType>(modeString, out var mode))
+                                throw new Exception($"Failed to parse node: unsupported mode '{modeString}'.");
+                            node.Mode = mode;
+                            continue;
+
+                        case SnapshotNode.Keywords.Value:
+                            if (document != null)
+                                throw new Exception(
+                                    "Failed to parse node: $value field is not in the header part.");
+                            ParseToNode(node, reader, root);
+                            continue;
+
+                        default:
+                            // Mark exiting the header part.
+                            isInHeader = false;
+                            break;
+                    }
+                }
+
+                document ??= node.AssignValue(new ObjectValue());
+                var element = document.CreateNode(name);
+                ParseToNode(element, reader, root);
+            }
+
+            reader.ReadEndDocument();
+        }
+
         /// <summary>
         /// Parse BSON data from the specified reader into a snapshot node.
         /// </summary>
@@ -34,13 +99,15 @@ public static class SnapshotBsonReaderExtensions
 
             root ??= node;
 
+            if (reader.State == BsonReaderState.Name)
+                node.Name = reader.ReadName();
+
             switch (reader.CurrentBsonType)
             {
                 case BsonType.EndOfDocument:
                     throw new Exception("Failed to parse node: unexpected end of document.");
 
                 // Supported primitive types:
-
                 case BsonType.Null:
                     node.Value = new NullValue();
                     break;
@@ -86,18 +153,14 @@ public static class SnapshotBsonReaderExtensions
                 // Supported complex types:
 
                 case BsonType.Document:
-                    HandleDocument();
+                    ParseDocument(node, root, reader);
                     break;
 
                 case BsonType.Array:
                     var array = node.AssignValue(new ArrayValue());
                     reader.ReadStartArray();
                     while (reader.ReadBsonType() != BsonType.EndOfDocument)
-                    {
-                        var element = array.CreateNode();
-                        ParseToNode(element, reader, root);
-                    }
-
+                        ParseToNode(array.CreateNode(), reader, root);
                     reader.ReadEndArray();
                     break;
 
@@ -128,71 +191,6 @@ public static class SnapshotBsonReaderExtensions
                     throw new Exception(
                         $"Failed to parse node: unsupported or invalid BSON type: {reader.CurrentBsonType}.");
             }
-
-            void HandleDocument()
-            {
-                reader.ReadStartDocument();
-                ObjectValue? document = null;
-                var isInHeader = true;
-                while (reader.ReadBsonType() != BsonType.EndOfDocument)
-                {
-                    var name = reader.ReadName();
-
-                    if (isInHeader)
-                    {
-                        switch (name)
-                        {
-                            case SnapshotNode.Keywords.Reference:
-                                if (reader.CurrentBsonType != BsonType.String)
-                                    throw new Exception("Failed to parse node: invalid $ref field type.");
-                                var referenceString = reader.ReadString();
-                                if (root.Locate(referenceString) is { } referencedNode)
-                                    node.Value = new InternalReferenceValue(referencedNode);
-                                else
-                                    // If the reference string cannot be resolved as a path,
-                                    // then treat it as the identifier of an external reference.
-                                    node.Value = new ExternalReferenceValue(referenceString);
-                                continue;
-
-                            case SnapshotNode.Keywords.Type:
-                                if (reader.CurrentBsonType != BsonType.String)
-                                    throw new Exception("Failed to parse node: invalid $type field type.");
-                                var typeString = reader.ReadString();
-                                node.Type = Type.GetType(typeString) ??
-                                            throw new Exception(
-                                                $"Failed to parse node: cannot resolve type '{typeString}'.");
-                                continue;
-
-                            case SnapshotNode.Keywords.Mode:
-                                if (reader.CurrentBsonType != BsonType.String)
-                                    throw new Exception("Failed to parse node: invalid $mode field type.");
-                                var modeString = reader.ReadString();
-                                if (!Enum.TryParse<SnapshotModeType>(modeString, out var mode))
-                                    throw new Exception($"Failed to parse node: unsupported mode '{modeString}'.");
-                                node.Mode = mode;
-                                continue;
-
-                            case SnapshotNode.Keywords.Value:
-                                if (document != null)
-                                    throw new Exception(
-                                        "Failed to parse node: $value field is not in the header part.");
-                                ParseToNode(node, reader, root);
-                                continue;
-
-                            default:
-                                // Mark exiting the header part.
-                                isInHeader = false;
-                                break;
-                        }
-                    }
-
-                    document ??= node.AssignValue(new ObjectValue());
-                    var element = document.CreateNode(name);
-                    ParseToNode(element, reader, root);
-                }
-
-                reader.ReadEndDocument();
-            }
         }
 
         public static SnapshotNode Parse(IBsonReader reader)
@@ -202,9 +200,9 @@ public static class SnapshotBsonReaderExtensions
             return node;
         }
 
-        public static SnapshotNode ParseFromJsonText(string json)
+        public static SnapshotNode ParseFromBsonText(string bson)
         {
-            using var reader = new JsonReader(json);
+            using var reader = new JsonReader(bson);
             return Parse(reader);
         }
 

@@ -2,6 +2,7 @@
 using MongoDB.Bson.IO;
 using SnapshotExpert.Data.Values;
 using SnapshotExpert.Data.Values.Primitives;
+using SnapshotExpert.Utilities;
 
 namespace SnapshotExpert.Data.IO;
 
@@ -13,10 +14,9 @@ public static class SnapshotBsonWriterExtensions
     {
         if (withType && node.Type != null)
         {
-            if (node.Type.AssemblyQualifiedName is not { } typeString)
+            if (node.Type.MinimalAssemblyQualifiedName is not { } typeString)
                 throw new Exception(
                     $"Failed to write node: associated type '{node.Type}' has no assembly qualified name.");
-            typeString = string.Join(',', typeString.Split(',')[..2]);
             writer.WriteName(SnapshotNode.Keywords.Type);
             writer.WriteString(typeString);
         }
@@ -102,6 +102,7 @@ public static class SnapshotBsonWriterExtensions
                         DumpNodeMetadata(writer, self, withMode: false);
                         writer.WriteName(SnapshotNode.Keywords.Value);
                     }
+
                     WritePrimitiveValue(writer, primitive);
                     if (hasValueMetadata)
                         writer.WriteEndDocument();
@@ -127,6 +128,7 @@ public static class SnapshotBsonWriterExtensions
                         default:
                             throw new Exception($"Unsupported reference self.Value type '{reference.GetType()}'.");
                     }
+
                     writer.WriteEndDocument();
                     break;
                 case ObjectValue document:
@@ -137,6 +139,7 @@ public static class SnapshotBsonWriterExtensions
                         writer.WriteName(child.Name);
                         child.Dump(writer);
                     }
+
                     writer.WriteEndDocument();
                     break;
                 case ArrayValue array:
@@ -147,6 +150,7 @@ public static class SnapshotBsonWriterExtensions
                         DumpNodeMetadata(writer, self);
                         writer.WriteName(SnapshotNode.Keywords.Value);
                     }
+
                     writer.WriteStartArray();
                     foreach (var child in array.DeclaredNodes)
                         child.Dump(writer);
@@ -157,26 +161,6 @@ public static class SnapshotBsonWriterExtensions
                 default:
                     throw new Exception($"Unsupported self.Value type '{self.Value.GetType()}'.");
             }
-        }
-
-        public string DumpToJsonText(bool indent)
-            => self.ToJson(new JsonWriterSettings { Indent = indent });
-
-        /// <summary>
-        /// Convert this snapshot node tree into a JSON string.
-        /// </summary>
-        /// <param name="settings">Settings for the JSON writer.</param>
-        /// <returns>JSON representation of this snapshot node tree.</returns>
-        public string DumpToJsonText(JsonWriterSettings? settings = null)
-        {
-            if (self.Value == null)
-                throw new InvalidOperationException(
-                    "Failed to convert node to JSON: no self.Value is bound to this node.");
-            settings ??= JsonWriterSettings.Defaults;
-            var text = new StringWriter();
-            using var writer = new JsonWriter(text, settings);
-            self.Dump(writer);
-            return text.ToString();
         }
 
         /// <summary>

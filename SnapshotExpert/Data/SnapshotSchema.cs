@@ -1,5 +1,5 @@
+using System.Text.Json;
 using MongoDB.Bson;
-using MongoDB.Bson.IO;
 using SnapshotExpert.Data.IO;
 using SnapshotExpert.Data.Values;
 using SnapshotExpert.Data.Values.Primitives;
@@ -115,11 +115,11 @@ public static class SchemaModelExtensions
             return value;
         }
 
-        public string DumpToJsonText(JsonWriterSettings? settings = null)
+        public string DumpToJsonText(JsonWriterOptions? settings = null)
         {
             var node = new SnapshotNode();
             model.Generate(node.AssignValue(new ObjectValue()));
-            return node.DumpToJsonText(settings ?? new JsonWriterSettings { Indent = true });
+            return node.DumpToJsonText(settings ?? new JsonWriterOptions());
         }
 
         public BsonDocument DumpToBsonDocument()
