@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
-        <Version>0.3.0-dev11221815</Version>
+        <Version>0.3.0-dev11261723</Version>
         <Title>SnapshotExpert Remoting</Title>
         <Authors>Pygmalions</Authors>
         <Description>This package provides extensions for SnapshotExpert to serialize and deserialize calls. It provides generators for call-proxies which serialize calls, and call-handlers which deserialize calls and redirect it to the proxied method. This pacakge also includes serializers for CancellationToken, Task&lt;T&gt;, ValueTask&lt;T&gt;, etc.</Description>
