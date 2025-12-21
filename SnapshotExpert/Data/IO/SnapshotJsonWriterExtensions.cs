@@ -154,7 +154,7 @@ public static class SnapshotJsonWriterExtensions
             }
         }
 
-        public string DumpToJsonText(bool indent = false)
+        public string DumpToJsonText(bool indent)
             => self.DumpToJsonText(new JsonWriterOptions { Indented = indent });
 
         /// <summary>
