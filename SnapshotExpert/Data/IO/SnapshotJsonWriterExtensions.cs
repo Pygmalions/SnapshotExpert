@@ -162,10 +162,10 @@ public static class SnapshotJsonWriterExtensions
         /// </summary>
         /// <param name="settings">Settings for the JSON writer.</param>
         /// <returns>JSON representation of this snapshot node tree.</returns>
-        public string DumpToJsonText(JsonWriterOptions settings)
+        public string DumpToJsonText(JsonWriterOptions settings = default)
             => Encoding.UTF8.GetString(self.DumpToJsonBytes(settings));
 
-        public byte[] DumpToJsonBytes(JsonWriterOptions settings)
+        public byte[] DumpToJsonBytes(JsonWriterOptions settings = default)
         {
             if (self.Value == null)
                 throw new InvalidOperationException(
