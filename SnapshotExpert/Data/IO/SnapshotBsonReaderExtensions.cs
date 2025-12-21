@@ -9,7 +9,7 @@ public static class SnapshotBsonReaderExtensions
 {
     extension(SnapshotNode)
     {
-        private static void ParseDocument(SnapshotNode node, SnapshotNode root, IBsonReader reader)
+        private static void ParseObject(SnapshotNode node, SnapshotNode root, IBsonReader reader)
         {
             reader.ReadStartDocument();
             ObjectValue? document = null;
@@ -56,7 +56,7 @@ public static class SnapshotBsonReaderExtensions
                             if (document != null)
                                 throw new Exception(
                                     "Failed to parse node: $value field is not in the header part.");
-                            SnapshotNode.ParseToNode(node, reader, root);
+                            SnapshotNode.ParseValue(node, reader, root);
                             continue;
 
                         default:
@@ -68,7 +68,7 @@ public static class SnapshotBsonReaderExtensions
 
                 document ??= node.AssignValue(new ObjectValue());
                 var element = document.CreateNode(name);
-                SnapshotNode.ParseToNode(element, reader, root);
+                SnapshotNode.ParseValue(element, reader, root);
             }
 
             reader.ReadEndDocument();
@@ -92,7 +92,7 @@ public static class SnapshotBsonReaderExtensions
         /// <exception cref="Exception">
         /// Throw when the BSON data contains invalid or unsupported part.
         /// </exception>
-        public static void ParseToNode(SnapshotNode node, IBsonReader reader, SnapshotNode? root = null)
+        public static void ParseValue(SnapshotNode node, IBsonReader reader, SnapshotNode? root = null)
         {
             if (reader.State == BsonReaderState.Initial)
                 reader.ReadBsonType();
@@ -151,16 +151,15 @@ public static class SnapshotBsonReaderExtensions
                     break;
 
                 // Supported complex types:
-
                 case BsonType.Document:
-                    SnapshotNode.ParseDocument(node, root, reader);
+                    SnapshotNode.ParseObject(node, root, reader);
                     break;
 
                 case BsonType.Array:
                     var array = node.AssignValue(new ArrayValue());
                     reader.ReadStartArray();
                     while (reader.ReadBsonType() != BsonType.EndOfDocument)
-                        SnapshotNode.ParseToNode(array.CreateNode(), reader, root);
+                        SnapshotNode.ParseValue(array.CreateNode(), reader, root);
                     reader.ReadEndArray();
                     break;
 
@@ -196,7 +195,7 @@ public static class SnapshotBsonReaderExtensions
         public static SnapshotNode Parse(IBsonReader reader)
         {
             var node = new SnapshotNode();
-            SnapshotNode.ParseToNode(node, reader);
+            SnapshotNode.ParseValue(node, reader);
             return node;
         }
 

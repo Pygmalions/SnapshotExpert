@@ -10,24 +10,24 @@ public static class SnapshotJsonReaderExtensions
 {
     extension(SnapshotNode)
     {
-        private static void ParseDocument(SnapshotNode node, SnapshotNode root, Utf8JsonReader reader)
+        private static void ParseObject(SnapshotNode node, SnapshotNode root, ref Utf8JsonReader reader)
         {
             if (reader.TokenType != JsonTokenType.StartObject)
                 throw new DataException("Failed to parse object: reader is not pointed to the start of an object.");
-
-            reader.Read();
+            reader.Read(); // Consume the start object token.
 
             ObjectValue? document = null;
-            var isInHeader = true;
-            while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+            var isInHeaderSection = true;
+            while (reader.TokenType != JsonTokenType.EndObject)
             {
                 if (reader.TokenType != JsonTokenType.PropertyName)
                     throw new DataException($"Failed to parse object: unexpected token '{reader.TokenType}'.");
 
                 var name = reader.GetString()
                            ?? throw new DataException("Failed to parse object: property name is null.");
+                reader.Read(); // Consume the property name token.
 
-                if (isInHeader)
+                if (isInHeaderSection)
                 {
                     switch (name)
                     {
@@ -65,22 +65,22 @@ public static class SnapshotJsonReaderExtensions
                             if (document != null)
                                 throw new DataException(
                                     "Failed to parse node: $value field is not in the header part.");
-                            SnapshotNode.ParseToNode(node, reader, root);
+                            SnapshotNode.ParseValue(node, ref reader, root);
                             continue;
 
                         default:
                             // Mark exiting the header part.
-                            isInHeader = false;
+                            isInHeaderSection = false;
                             break;
                     }
                 }
 
                 document ??= node.AssignValue(new ObjectValue());
                 var element = document.CreateNode(name);
-                SnapshotNode.ParseToNode(element, reader, root);
+                SnapshotNode.ParseValue(element, ref reader, root);
             }
 
-            reader.Read();
+            reader.Read(); // Consume the end object token.
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ public static class SnapshotJsonReaderExtensions
         /// <exception cref="DataException">
         /// Throw when the JSON data contains invalid or unsupported part.
         /// </exception>
-        public static void ParseToNode(SnapshotNode node, Utf8JsonReader reader, SnapshotNode? root = null)
+        public static void ParseValue(SnapshotNode node, ref Utf8JsonReader reader, SnapshotNode? root = null)
         {
             if (reader.TokenType == JsonTokenType.None)
                 reader.Read();
@@ -112,21 +112,26 @@ public static class SnapshotJsonReaderExtensions
             {
                 case JsonTokenType.PropertyName:
                     node.Name = reader.GetString() ?? string.Empty;
-                    SnapshotNode.ParseToNode(node, reader, root);
+                    reader.Read();
+                    SnapshotNode.ParseValue(node, ref reader, root);
                     break;
                 // Supported primitive types:
 
                 case JsonTokenType.Null:
                     node.Value = new NullValue();
+                    reader.Read();
                     break;
                 case JsonTokenType.True:
                     node.Value = new BooleanValue(true);
+                    reader.Read();
                     break;
                 case JsonTokenType.False:
                     node.Value = new BooleanValue(false);
+                    reader.Read();
                     break;
                 case JsonTokenType.String:
                     node.Value = new StringValue(reader.GetString() ?? string.Empty);
+                    reader.Read();
                     break;
                 case JsonTokenType.Number:
                     if (reader.TryGetInt32(out var integer32))
@@ -139,14 +144,17 @@ public static class SnapshotJsonReaderExtensions
                         node.Value = new DecimalValue(decimal128);
                     else
                         throw new DataException($"Failed to parse node: unsupported number type '{reader.TokenType}'.");
+                    reader.Read();
                     break;
                 case JsonTokenType.StartObject:
-                    SnapshotNode.ParseDocument(node, root, reader);
+                    SnapshotNode.ParseObject(node, root, ref reader);
                     break;
                 case JsonTokenType.StartArray:
                     var array = new ArrayValue();
-                    while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
-                        SnapshotNode.ParseToNode(array.CreateNode(), reader, root);
+                    reader.Read(); // Consume the start array token.
+                    while (reader.TokenType != JsonTokenType.EndArray)
+                        SnapshotNode.ParseValue(array.CreateNode(), ref reader, root);
+                    reader.Read(); // Consume the end array token.
                     node.Value = array;
                     break;
 
@@ -154,33 +162,36 @@ public static class SnapshotJsonReaderExtensions
 
                 case JsonTokenType.None:
                 case JsonTokenType.Comment:
+                    reader.Read();
                     break;
 
                 // Invalid tokens at the current position:
-
                 case JsonTokenType.EndArray:
                 case JsonTokenType.EndObject:
                     throw new DataException($"Failed to parse node: unexpected token '{reader.TokenType}'.");
-
                 default:
                     throw new DataException(
                         $"Failed to parse node: unsupported or invalid JSON type: {reader.TokenType}.");
             }
         }
 
-        public static SnapshotNode Parse(Utf8JsonReader reader)
+        public static SnapshotNode Parse(ref Utf8JsonReader reader)
         {
             var node = new SnapshotNode();
-            SnapshotNode.ParseToNode(node, reader);
+            SnapshotNode.ParseValue(node, ref reader);
             return node;
         }
 
         public static SnapshotNode ParseFromJsonBytes(ReadOnlySpan<byte> json)
-            =>
-                SnapshotNode.Parse(new Utf8JsonReader(json));
+        {
+            var reader = new Utf8JsonReader(json);
+            return SnapshotNode.Parse(ref reader);
+        }
 
         public static SnapshotNode ParseFromJsonText(string json)
-            =>
-                SnapshotNode.Parse(new Utf8JsonReader(Encoding.UTF8.GetBytes(json)));
+        {
+            var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json));
+            return SnapshotNode.Parse(ref reader);
+        }
     }
 }

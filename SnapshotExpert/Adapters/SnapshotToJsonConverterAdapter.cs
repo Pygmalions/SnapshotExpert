@@ -9,7 +9,7 @@ public class SnapshotToJsonConverterAdapter<TTarget>(SnapshotSerializer<TTarget>
 {
     public override TTarget Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var node = SnapshotNode.Parse(reader);
+        var node = SnapshotNode.Parse(ref reader);
         serializer.NewInstance(out var target);
         serializer.LoadSnapshot(ref target, node);
         return target;
