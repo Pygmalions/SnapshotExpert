@@ -173,6 +173,7 @@ public static class SnapshotJsonWriterExtensions
             using var stream = new MemoryStream();
             using var writer = new Utf8JsonWriter(stream, settings);
             self.Dump(writer);
+            writer.Flush();
             return stream.ToArray();
         }
     }

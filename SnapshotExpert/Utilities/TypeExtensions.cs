@@ -152,7 +152,7 @@ internal static partial class TypeExtensions
             var selfArguments = self.GetGenericArguments();
             var otherArguments = target.GetGenericArguments();
             return selfArguments.Index()
-                .All(argument => Matches(argument.Item, otherArguments[argument.Index]));
+                .All(argument => argument.Item.Matches(otherArguments[argument.Index]));
         }
 
         /// <summary>
@@ -289,7 +289,7 @@ internal static partial class TypeExtensions
             foreach (var genericArgument in self.GetGenericArguments())
             {
                 builder.Append('`');
-                builder.Append(CreateDynamicFriendlyName(genericArgument));
+                builder.Append(genericArgument.CreateDynamicFriendlyName());
             }
 
             return builder.ToString();

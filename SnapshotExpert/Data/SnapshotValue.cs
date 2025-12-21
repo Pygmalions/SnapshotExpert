@@ -22,16 +22,18 @@ public abstract partial class SnapshotValue : ISnapshotConvertible
     internal virtual IEnumerable<SnapshotNode> DeclaredNodes => [];
 
     /// <summary>
+    /// Human-readable string for this node to display in the debugger.
+    /// </summary>
+    public abstract string DebuggerString { get; }
+
+    SnapshotValue ISnapshotConvertible.Value => this;
+
+    /// <summary>
     /// Get the declared node with the specified name.
     /// </summary>
     /// <param name="name">Name of the node declared by this value.</param>
     /// <returns>Located node, or null if not found.</returns>
     internal virtual SnapshotNode? GetDeclaredNode(string name) => null;
-    
-    /// <summary>
-    /// Human-readable string for this node to display in the debugger.
-    /// </summary>
-    public abstract string DebuggerString { get; }
 
     /// <summary>
     /// Compare the content of this value with another value.
@@ -53,6 +55,17 @@ public abstract partial class SnapshotValue : ISnapshotConvertible
     /// </summary>
     public static bool ContentEquals(SnapshotValue? x, SnapshotValue? y)
         => ReferenceEquals(x, y) || (x?.ContentEquals(y) ?? y == null);
+}
 
-    SnapshotValue ISnapshotConvertible.Value => this;
+public static class SnapshotValueExtensions
+{
+    extension(SnapshotValue self)
+    {
+        /// <summary>
+        /// Create a snapshot node bound to this value.
+        /// </summary>
+        /// <param name="name">Name of this node.</param>
+        /// <returns>Created node which bound with this value.</returns>
+        public SnapshotNode ToSnapshotNode(string name = "#") => new(name) { Value = self };
+    }
 }

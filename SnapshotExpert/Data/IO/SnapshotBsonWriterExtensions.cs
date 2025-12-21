@@ -184,6 +184,8 @@ public static class SnapshotBsonWriterExtensions
             else
                 self.Dump(writer);
 
+            writer.Flush();
+
             return stream.ToArray();
         }
 

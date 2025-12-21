@@ -65,7 +65,7 @@ public static class SnapshotJsonReaderExtensions
                             if (document != null)
                                 throw new DataException(
                                     "Failed to parse node: $value field is not in the header part.");
-                            ParseToNode(node, reader, root);
+                            SnapshotNode.ParseToNode(node, reader, root);
                             continue;
 
                         default:
@@ -77,7 +77,7 @@ public static class SnapshotJsonReaderExtensions
 
                 document ??= node.AssignValue(new ObjectValue());
                 var element = document.CreateNode(name);
-                ParseToNode(element, reader, root);
+                SnapshotNode.ParseToNode(element, reader, root);
             }
 
             reader.Read();
@@ -112,7 +112,7 @@ public static class SnapshotJsonReaderExtensions
             {
                 case JsonTokenType.PropertyName:
                     node.Name = reader.GetString() ?? string.Empty;
-                    ParseToNode(node, reader, root);
+                    SnapshotNode.ParseToNode(node, reader, root);
                     break;
                 // Supported primitive types:
 
@@ -141,12 +141,12 @@ public static class SnapshotJsonReaderExtensions
                         throw new DataException($"Failed to parse node: unsupported number type '{reader.TokenType}'.");
                     break;
                 case JsonTokenType.StartObject:
-                    ParseDocument(node, root, reader);
+                    SnapshotNode.ParseDocument(node, root, reader);
                     break;
                 case JsonTokenType.StartArray:
                     var array = new ArrayValue();
                     while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
-                        ParseToNode(array.CreateNode(), reader, root);
+                        SnapshotNode.ParseToNode(array.CreateNode(), reader, root);
                     node.Value = array;
                     break;
 
@@ -171,14 +171,16 @@ public static class SnapshotJsonReaderExtensions
         public static SnapshotNode Parse(Utf8JsonReader reader)
         {
             var node = new SnapshotNode();
-            ParseToNode(node, reader);
+            SnapshotNode.ParseToNode(node, reader);
             return node;
         }
 
         public static SnapshotNode ParseFromJsonBytes(ReadOnlySpan<byte> json)
-            => Parse(new Utf8JsonReader(json));
+            =>
+                SnapshotNode.Parse(new Utf8JsonReader(json));
 
         public static SnapshotNode ParseFromJsonText(string json)
-            => Parse(new Utf8JsonReader(Encoding.UTF8.GetBytes(json)));
+            =>
+                SnapshotNode.Parse(new Utf8JsonReader(Encoding.UTF8.GetBytes(json)));
     }
 }

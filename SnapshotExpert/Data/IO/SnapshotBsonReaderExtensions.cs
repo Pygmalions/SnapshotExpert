@@ -56,7 +56,7 @@ public static class SnapshotBsonReaderExtensions
                             if (document != null)
                                 throw new Exception(
                                     "Failed to parse node: $value field is not in the header part.");
-                            ParseToNode(node, reader, root);
+                            SnapshotNode.ParseToNode(node, reader, root);
                             continue;
 
                         default:
@@ -68,7 +68,7 @@ public static class SnapshotBsonReaderExtensions
 
                 document ??= node.AssignValue(new ObjectValue());
                 var element = document.CreateNode(name);
-                ParseToNode(element, reader, root);
+                SnapshotNode.ParseToNode(element, reader, root);
             }
 
             reader.ReadEndDocument();
@@ -153,14 +153,14 @@ public static class SnapshotBsonReaderExtensions
                 // Supported complex types:
 
                 case BsonType.Document:
-                    ParseDocument(node, root, reader);
+                    SnapshotNode.ParseDocument(node, root, reader);
                     break;
 
                 case BsonType.Array:
                     var array = node.AssignValue(new ArrayValue());
                     reader.ReadStartArray();
                     while (reader.ReadBsonType() != BsonType.EndOfDocument)
-                        ParseToNode(array.CreateNode(), reader, root);
+                        SnapshotNode.ParseToNode(array.CreateNode(), reader, root);
                     reader.ReadEndArray();
                     break;
 
@@ -196,27 +196,27 @@ public static class SnapshotBsonReaderExtensions
         public static SnapshotNode Parse(IBsonReader reader)
         {
             var node = new SnapshotNode();
-            ParseToNode(node, reader);
+            SnapshotNode.ParseToNode(node, reader);
             return node;
         }
 
         public static SnapshotNode ParseFromBsonText(string bson)
         {
             using var reader = new JsonReader(bson);
-            return Parse(reader);
+            return SnapshotNode.Parse(reader);
         }
 
         public static SnapshotNode ParseFromBsonBytes(byte[] bson)
         {
             using var stream = new MemoryStream(bson);
             using var reader = new BsonBinaryReader(stream);
-            return Parse(reader);
+            return SnapshotNode.Parse(reader);
         }
 
         public static SnapshotNode ParseFromBsonDocument(BsonDocument document)
         {
             using var reader = new BsonDocumentReader(document);
-            return Parse(reader);
+            return SnapshotNode.Parse(reader);
         }
     }
 }

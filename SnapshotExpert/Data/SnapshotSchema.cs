@@ -1,6 +1,3 @@
-using System.Text.Json;
-using MongoDB.Bson;
-using SnapshotExpert.Data.IO;
 using SnapshotExpert.Data.Values;
 using SnapshotExpert.Data.Values.Primitives;
 
@@ -106,34 +103,23 @@ public abstract record SnapshotSchema
 
 public static class SchemaModelExtensions
 {
-    extension(SnapshotSchema model)
+    extension(SnapshotSchema self)
     {
-        public ObjectValue DumpToSnapshotValue()
+        public ObjectValue ToSnapshotValue()
         {
             var value = new ObjectValue();
-            model.Generate(value);
+            self.Generate(value);
             return value;
         }
 
-        public string DumpToJsonText(JsonWriterOptions? settings = null)
+        /// <summary>
+        /// Create a snapshot node bound to this value.
+        /// </summary>
+        /// <param name="name">Name of this node.</param>
+        /// <returns>Created node which bound with this value.</returns>
+        public SnapshotNode ToSnapshotNode(string name = "#") => new(name)
         {
-            var node = new SnapshotNode();
-            model.Generate(node.AssignValue(new ObjectValue()));
-            return node.DumpToJsonText(settings ?? new JsonWriterOptions());
-        }
-
-        public BsonDocument DumpToBsonDocument()
-        {
-            var node = new SnapshotNode();
-            model.Generate(node.AssignValue(new ObjectValue()));
-            return node.DumpToBsonDocument();
-        }
-
-        public byte[] DumpToBsonBytes()
-        {
-            var node = new SnapshotNode();
-            model.Generate(node.AssignValue(new ObjectValue()));
-            return node.DumpToBsonBytes();
-        }
+            Value = self.ToSnapshotValue()
+        };
     }
 }

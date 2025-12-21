@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using SnapshotExpert.Data;
+using SnapshotExpert.Data.IO;
 using SnapshotExpert.Data.Schemas;
 using SnapshotExpert.Data.Schemas.Primitives;
 using SnapshotExpert.Data.Values;
@@ -34,7 +35,7 @@ public class TestSchemasPrimitives
         }
 
         // Smoke: generation should produce a BSON document with a 'type' field
-        var value = schema.DumpToSnapshotValue();
+        var value = schema.ToSnapshotValue();
         Assert.That(value.Contains("type"), Is.True);
     }
 
@@ -65,7 +66,7 @@ public class TestSchemasPrimitives
         }
 
         // Smoke: generation
-        var value = schema.DumpToSnapshotValue();
+        var value = schema.ToSnapshotValue();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(value.Contains("type"), Is.True);
@@ -107,7 +108,7 @@ public class TestSchemasPrimitives
         }
 
         // Smoke: generation
-        var value = schema.DumpToSnapshotValue();
+        var value = schema.ToSnapshotValue();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(value.Contains("type"), Is.True);
@@ -143,7 +144,7 @@ public class TestSchemasPrimitives
         }
 
         // Smoke: generation
-        var value = schema.DumpToSnapshotValue();
+        var value = schema.ToSnapshotValue();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(value.Contains("type"), Is.True);
@@ -168,7 +169,7 @@ public class TestSchemasPrimitives
         }
 
         // Smoke: generation shouldn't throw
-        Assert.DoesNotThrow(() => schema.DumpToBsonDocument());
+        Assert.DoesNotThrow(() => schema.ToSnapshotNode().DumpToBsonDocument());
     }
 
     [Test]
@@ -189,7 +190,7 @@ public class TestSchemasPrimitives
         }
 
         // Smoke: generation shouldn't throw
-        Assert.DoesNotThrow(() => schema.DumpToBsonDocument());
+        Assert.DoesNotThrow(() => schema.ToSnapshotNode().DumpToBsonDocument());
     }
 
     [Test]
@@ -228,7 +229,7 @@ public class TestSchemasPrimitives
         }
 
         // Smoke: generation should include array constraints when set
-        var value = schema.DumpToSnapshotValue();
+        var value = schema.ToSnapshotValue();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(value.Contains("type"), Is.True);
@@ -285,7 +286,7 @@ public class TestSchemasPrimitives
         }
 
         // Smoke: generation should include properties/required/additionalProperties
-        var bson = schema.DumpToBsonDocument();
+        var bson = schema.ToSnapshotNode().DumpToBsonDocument();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(bson.Contains("type"), Is.True);
@@ -324,7 +325,7 @@ public class TestSchemasPrimitives
         }
 
         // Generated schema should be an object with $binary property
-        var value = schema.DumpToSnapshotValue();
+        var value = schema.ToSnapshotValue();
         using (Assert.EnterMultipleScope())
         {
             Assert.That(value.Contains("type"), Is.True);
