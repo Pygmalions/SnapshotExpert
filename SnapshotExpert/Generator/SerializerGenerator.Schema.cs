@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using DocumentationParser;
 using EmitToolbox;
+using EmitToolbox.Builders;
 using EmitToolbox.Extensions;
 using EmitToolbox.Symbols;
 using EmitToolbox.Utilities;
@@ -37,7 +38,7 @@ public partial class SerializerGenerator
                 text.Append(" See-Also: ");
                 text.Append(string.Join(", ", entry.SeeAlsoEntryNames));
             }
-            
+
             return text.ToString();
         }
     }
@@ -83,7 +84,7 @@ public partial class SerializerGenerator
                 .Invoke(() => SchemaHelper.RetrieveDocumentation(
                         Any<string>.Value, Any<IDocumentationProvider?>.Value)!,
                     [
-                        _method.Value(EntryName.Of(_context.TargetType)),
+                        _method.Literal(EntryName.Of(_context.TargetType)),
                         _fieldDocumentation
                     ])
                 .ToSymbol();
@@ -112,7 +113,7 @@ public partial class SerializerGenerator
                 .Invoke(() => SchemaHelper.RetrieveDocumentation(
                         Any<string>.Value, Any<IDocumentationProvider?>.Value)!,
                     [
-                        _method.Value(EntryName.Of(metadata)),
+                        _method.Literal(EntryName.Of(metadata)),
                         _fieldDocumentation
                     ])
                 .ToSymbol();
@@ -127,7 +128,7 @@ public partial class SerializerGenerator
             _variableRequiredProperties.Invoke(
                 target => target.Add(Any<string>.Value, Any<SnapshotSchema>.Value),
                 [
-                    _method.Value(metadata.Name),
+                    _method.Literal(metadata.Name),
                     variableMemberSchema
                 ]);
         }

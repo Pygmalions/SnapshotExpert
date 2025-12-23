@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
 using EmitToolbox;
+using EmitToolbox.Builders;
 using EmitToolbox.Extensions;
 using EmitToolbox.Symbols;
 using EmitToolbox.Utilities;
@@ -70,7 +71,7 @@ internal static partial class MatrixSerializerGenerator
             // Store the length of the current dimension.
             variablesLength[dimension] = argumentTarget
                 .Invoke<int>(typeof(Array).GetMethod(nameof(Array.GetLength))!,
-                    [method.Value(dimension)])
+                    [method.Literal(dimension)])
                 .ToSymbol();
         }
 
@@ -189,10 +190,10 @@ internal static partial class MatrixSerializerGenerator
         {
             labelBeginInitialization.GotoIfFalse(
                 argumentTarget.Invoke<int>(typeof(Array).GetMethod(nameof(Array.GetLength))!,
-                        [method.Value(dimension)])
+                        [method.Literal(dimension)])
                     .IsEqualTo(variableLength));
         }
-        
+
         // The matrix has the same shape, skip initialization.
         labelEndInitialization.Goto();
 
@@ -204,7 +205,7 @@ internal static partial class MatrixSerializerGenerator
             matrixType.GetConstructor(
                 Enumerable.Repeat(elementType, matrixRank).ToArray())!,
             variablesLength);
-        
+
         labelEndInitialization.Mark();
 
         RecursivelyGenerateForDimension(0, argumentNode);

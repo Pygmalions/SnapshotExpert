@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
-        <Version>0.3.0-dev12212116</Version>
+        <Version>0.3.1-dev12232300</Version>
         <Title>Snapshot Expert</Title>
         <Authors>Pygmalions</Authors>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -29,8 +29,8 @@
 
     <ItemGroup>
         <PackageReference Include="DocumentationParser" Version="0.1.0"/>
-        <PackageReference Include="EmitToolbox" Version="0.3.0-dev11212044" />
-        <PackageReference Include="InjectionExpert" Version="0.3.0-dev11212052" />
+        <PackageReference Include="EmitToolbox" Version="0.3.1-dev12232234"/>
+        <PackageReference Include="InjectionExpert" Version="0.3.1-dev12232254"/>
         <PackageReference Include="MongoDB.Bson" Version="3.5.0" />
     </ItemGroup>
 

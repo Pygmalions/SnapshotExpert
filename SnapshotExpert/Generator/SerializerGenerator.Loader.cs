@@ -1,5 +1,6 @@
 using System.Reflection;
 using EmitToolbox;
+using EmitToolbox.Builders;
 using EmitToolbox.Extensions;
 using EmitToolbox.Symbols;
 using EmitToolbox.Utilities;
@@ -72,7 +73,7 @@ public partial class SerializerGenerator
         {
             _variableObjectValue.Invoke(
                     target => target.GetNode(Any<string>.Value),
-                    [_method.Value(metadata.Name)])
+                    [_method.Literal(metadata.Name)])
                 .ToSymbol(_variableMemberNode);
 
             using (_method.If(_variableObjectValue.IsNotNull()))

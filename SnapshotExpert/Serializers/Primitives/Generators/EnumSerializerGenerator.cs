@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
 using EmitToolbox;
+using EmitToolbox.Builders;
 using EmitToolbox.Extensions;
 using EmitToolbox.Symbols;
 using EmitToolbox.Utilities;
@@ -12,18 +13,6 @@ namespace SnapshotExpert.Serializers.Primitives.Generators;
 
 internal static partial class EnumSerializerGenerator
 {
-    private enum EnumUnderlyingType
-    {
-        SByte = 0,
-        Byte = 1,
-        Int16 = 10,
-        UInt16 = 11,
-        Int32 = 20,
-        UInt32 = 21,
-        Int64 = 30,
-        UInt64 = 31
-    }
-
     private static readonly DynamicResourceForType<Type> GeneratedSerializerTypes = new(GenerateSerializerType);
 
     public static Type GetSerializerType(Type enumType) => GeneratedSerializerTypes[enumType];
@@ -34,7 +23,7 @@ internal static partial class EnumSerializerGenerator
         var typeContext = assemblyContext.DefineClass(
             enumType.CreateDynamicFriendlyName("GeneratedEnumSerializer_"),
             parent: baseType);
-        
+
         var underlyingType = enumType.GetEnumUnderlyingType() switch
         {
             { } type when type == typeof(sbyte) => EnumUnderlyingType.SByte,
@@ -49,7 +38,7 @@ internal static partial class EnumSerializerGenerator
         };
 
         var enumEntries = Enum.GetValues(enumType);
-        
+
         GenerateSaveSnapshotMethod(typeContext, underlyingType, enumType, enumEntries);
         GenerateLoadSnapshotMethod(typeContext, underlyingType, enumType, enumEntries);
         GenerateSchemaGenerator(typeContext, enumType);
@@ -76,17 +65,17 @@ internal static partial class EnumSerializerGenerator
         DynamicType typeContext, EnumUnderlyingType underlyingType, Type enumType, Array enumEntries)
     {
         var baseType = typeof(SnapshotSerializerValueTypeBase<>).MakeGenericType(enumType);
-        
+
         var method = typeContext.MethodFactory.Instance.OverrideAction(
             baseType.GetMethod(nameof(SnapshotSerializerValueTypeBase<>.SaveSnapshot),
                 [enumType.MakeByRefType(), typeof(SnapshotNode), typeof(SnapshotWritingScope)])!);
-        
+
         var code = method.Code;
 
         var argumentTarget = method.Argument(0, enumType.MakeByRefType());
         var argumentNode = method.Argument<SnapshotNode>(1);
         var argumentScope = method.Argument<SnapshotWritingScope>(2);
-        
+
         // Serialized snapshot value.
         var variableSnapshotValue = method.Variable<SnapshotValue>();
 
@@ -130,16 +119,16 @@ internal static partial class EnumSerializerGenerator
                 {
                     variableEnumInteger.LoadContent();
                     if (underlyingType < EnumUnderlyingType.Int64)
-                        method.Value(Convert.ToInt32(enumEntries.GetValue(index))).LoadContent();
+                        method.Literal(Convert.ToInt32(enumEntries.GetValue(index))).LoadContent();
                     else
-                        method.Value(Convert.ToInt64(enumEntries.GetValue(index))).LoadContent();
+                        method.Literal(Convert.ToInt64(enumEntries.GetValue(index))).LoadContent();
                     code.Emit(OpCodes.Beq, entryLabels[index]);
                 }
 
                 // Throw if no matching entry is found.
                 method.New(() => new Exception(Any<string>.Value),
                     [
-                        method.Value(
+                        method.Literal(
                             $"Failed to save snapshot for enum '{enumType}': enum value out of range.")
                     ])
                     .LoadContent();
@@ -152,7 +141,7 @@ internal static partial class EnumSerializerGenerator
                     variableSnapshotValue.AssignContent(
                         method.New(
                             () => new StringValue(Any<string>.Value),
-                            [method.Value(enumEntries.GetValue(index)!.ToString()!)])
+                            [method.Literal(enumEntries.GetValue(index)!.ToString()!)])
                     );
 
                     code.Emit(OpCodes.Br, labelEnd.Label);
@@ -172,14 +161,14 @@ internal static partial class EnumSerializerGenerator
         Type enumType, Array enumEntries)
     {
         var baseType = typeof(SnapshotSerializerValueTypeBase<>).MakeGenericType(enumType);
-        
+
         var method = typeContext.MethodFactory.Instance.OverrideAction(
             baseType.GetMethod(nameof(SnapshotSerializerValueTypeBase<>.LoadSnapshot),
                 [enumType.MakeByRefType(), typeof(SnapshotNode), typeof(SnapshotReadingScope)])!);
-        
+
         var argumentTarget = method.Argument(0, enumType.MakeByRefType());
         var argumentNode = method.Argument<SnapshotNode>(1);
-        
+
         var code = method.Code;
 
         var variableEnumInteger = method.Variable(
@@ -208,8 +197,8 @@ internal static partial class EnumSerializerGenerator
 
                 variableEnumInteger.AssignContent(
                     underlyingType < EnumUnderlyingType.Int64
-                        ? method.Value(Convert.ToInt32(enumEntry))
-                        : method.Value(Convert.ToInt64(enumEntry))
+                        ? method.Literal(Convert.ToInt32(enumEntry))
+                        : method.Literal(Convert.ToInt64(enumEntry))
                 );
                 labelConverting.Goto();
 
@@ -230,7 +219,7 @@ internal static partial class EnumSerializerGenerator
         {
             var symbolSnapshotNumber = variableSnapshotValue.CastTo<Integer64Value>()
                 .GetPropertyValue(target => target.Value);
-            
+
             if (underlyingType < EnumUnderlyingType.Int64)
                 variableEnumInteger.AssignContent(symbolSnapshotNumber.ToInt32());
             else
@@ -281,5 +270,17 @@ internal static partial class EnumSerializerGenerator
         }
 
         method.Return();
+    }
+
+    private enum EnumUnderlyingType
+    {
+        SByte = 0,
+        Byte = 1,
+        Int16 = 10,
+        UInt16 = 11,
+        Int32 = 20,
+        UInt32 = 21,
+        Int64 = 30,
+        UInt64 = 31
     }
 }

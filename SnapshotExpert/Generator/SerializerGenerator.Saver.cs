@@ -61,8 +61,8 @@ public partial class SerializerGenerator
             var fieldMember = _argumentTarget.Field(field);
             var variableMemberNode = _variableObjectValue
                 .Invoke(target => target.CreateNode(Any<string>.Value),
-                    [_method.Value(metadata.Name)]);
-            
+                    [_method.Literal(metadata.Name)]);
+
             fieldSerializer.Invoke(typeof(SnapshotSerializer<>)
                     .MakeGenericType(field.FieldType)
                     .GetMethod(nameof(SnapshotSerializer<>.SaveSnapshot),

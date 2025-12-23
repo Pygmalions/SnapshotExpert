@@ -116,7 +116,7 @@ public static partial class SerializerGenerator
                 method
                     .Invoke(
                         () => RuntimeHelpers.GetUninitializedObject(Any<Type>.Value),
-                        [method.Value(context.TargetType)])
+                        [method.Literal(context.TargetType)])
                     .ToSymbol(variableInstance);
             }
 
@@ -134,7 +134,7 @@ public static partial class SerializerGenerator
                 break;
             }
         }
-        
+
         argumentInstance.CopyValueFrom(variableInstance);
 
         method.Return();

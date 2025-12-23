@@ -2,6 +2,7 @@
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using EmitToolbox;
+using EmitToolbox.Builders;
 using EmitToolbox.Extensions;
 using EmitToolbox.Symbols;
 using EmitToolbox.Utilities;
@@ -75,7 +76,7 @@ internal static class TupleSerializerGenerator
         var variableResult = method.New<TupleSchema>();
 
         variableResult.SetPropertyValue(target => target.Items, variableSchemas);
-        variableResult.SetPropertyValue(target => target.Title, method.Value("Tuple"));
+        variableResult.SetPropertyValue(target => target.Title, method.Literal("Tuple"));
 
         method.Return(variableResult);
     }
@@ -96,7 +97,7 @@ internal static class TupleSerializerGenerator
 
         var variableArray = method.New<ArrayValue>(
             typeof(ArrayValue).GetConstructor([typeof(int)])!,
-            [method.Value(items.Length)]
+            [method.Literal(items.Length)]
         );
 
         foreach (var (propertyItem, fieldSerializer) in items)
@@ -153,7 +154,7 @@ internal static class TupleSerializerGenerator
         // Throw an exception if the length does not match.
         method.New(() => new Exception(Any<string>.Value),
         [
-            method.Value(
+            method.Literal(
                 $"Failed to load snapshot for ValueTuple '{tupleType}': array has an incorrect length.")
         ]).LoadContent();
         code.Emit(OpCodes.Throw);
@@ -200,7 +201,7 @@ internal static class TupleSerializerGenerator
         {
             var symbolSubNode = variableArray.Invoke<SnapshotNode>(
                 typeof(ArrayValue).GetMethod("get_Item")!,
-                [method.Value(index)]);
+                [method.Literal(index)]);
 
             fieldSerializer.SymbolOf<SnapshotSerializer>(method, method.This())
                 .Invoke(typeof(SnapshotSerializer<>)
