@@ -128,6 +128,10 @@ public class CallHandlerGenerator
 
         var fieldSerializedArguments = asyncBuilder.Capture(
             method.Argument<ObjectValue>(0));
+        var fieldCancellationToken = asyncBuilder.Capture(
+            method.Argument<CancellationToken>(1));
+
+        fieldCancellationToken.Invoke(target => target.ThrowIfCancellationRequested());
 
         var variablesRawArgument = targetMethod.GetParameters()
             .Select(parameter => asyncMethod.Variable(parameter.ParameterType))
@@ -136,6 +140,8 @@ public class CallHandlerGenerator
         // Deserialize arguments.
         foreach (var (index, parameter) in targetMethod.GetParameters().Index())
         {
+            fieldCancellationToken.Invoke(target => target.ThrowIfCancellationRequested());
+
             var variableArgumentNode = fieldSerializedArguments.Invoke(
                 target => target.GetNode(Any<string>.Value),
                 [asyncMethod.Literal(parameter.Name ?? index.ToString())]);
@@ -176,6 +182,8 @@ public class CallHandlerGenerator
 
             labelContinue.Mark();
         }
+
+        fieldCancellationToken.Invoke(target => target.ThrowIfCancellationRequested());
 
         // Invoke method.
         ISymbol? variableRawResult = asyncBuilder

@@ -42,7 +42,7 @@ public class TestCallHandlerGenerator
     }
 
     [Test]
-    public async Task CreateCallHandler_Invoke_Functor()
+    public async Task CreateAndInvoke_Functor()
     {
         var instance = new SampleClass
         {
@@ -65,7 +65,7 @@ public class TestCallHandlerGenerator
     }
 
     [Test]
-    public async Task CreateCallHandler_Invoke_AsyncFunctor_Task()
+    public async Task CreateAndInvoke_AsyncFunctor_Task()
     {
         var instance = new SampleClass
         {
@@ -88,7 +88,7 @@ public class TestCallHandlerGenerator
     }
 
     [Test]
-    public async Task CreateCallHandler_Invoke_AsyncFunctor_ValueTask()
+    public async Task CreateAndInvoke_AsyncFunctor_ValueTask()
     {
         var instance = new SampleClass
         {
@@ -111,7 +111,7 @@ public class TestCallHandlerGenerator
     }
 
     [Test]
-    public async Task CreateCallHandler_Invoke_Action()
+    public async Task CreateAndInvoke_Action()
     {
         var instance = new SampleClass
         {
@@ -133,7 +133,7 @@ public class TestCallHandlerGenerator
     }
 
     [Test]
-    public async Task CreateCallHandler_Invoke_AsyncAction_Task()
+    public async Task CreateAndInvoke_AsyncAction_Task()
     {
         var instance = new SampleClass
         {
@@ -155,7 +155,7 @@ public class TestCallHandlerGenerator
     }
 
     [Test]
-    public async Task CreateCallHandler_Invoke_AsyncAction_ValueTask()
+    public async Task CreateAndInvoke_AsyncAction_ValueTask()
     {
         var instance = new SampleClass
         {
@@ -174,5 +174,31 @@ public class TestCallHandlerGenerator
         ));
 
         Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void CreateAndInvoke_Cancel_AsyncAction_ValueTask()
+    {
+        var instance = new SampleClass
+        {
+            Number = TestContext.CurrentContext.Random.Next(0, 100)
+        };
+
+        var serializers = new SerializerContainer();
+
+        var handler = CallHandlerGenerator.For(serializers, instance.DoNothingAsyncValueTask);
+
+        var cancellationSource = new CancellationTokenSource();
+
+        cancellationSource.Cancel();
+
+        var result = handler.HandleCall(new ObjectValue(new OrderedDictionary<string, SnapshotValue>()
+            {
+                { "a", new Integer32Value(1) },
+                { "b", new Integer32Value(2) }
+            }
+        ), cancellationSource.Token);
+
+        Assert.That(result.IsCanceled, Is.True);
     }
 }
