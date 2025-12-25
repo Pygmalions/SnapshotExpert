@@ -8,8 +8,8 @@ public interface ICallProxy
     /// <summary>
     /// Proxy a serialized call.
     /// </summary>
-    /// <param name="arguments">Arguments </param>
-    /// <returns></returns>
+    /// <param name="arguments">Serialized arguments.</param>
+    /// <returns>Serialized result.</returns>
     ValueTask<SnapshotValue?> Call(ObjectValue arguments);
 }
 

@@ -13,10 +13,36 @@ public class TestCallHandlerGenerator
         public int Number { get; set; }
 
         public int Add(int a, int b) => a + b + Number;
+
+        public async Task<int> AddAsyncTask(int a, int b)
+        {
+            await Task.Yield();
+            return a + b + Number;
+        }
+
+        public async ValueTask<int> AddAsyncValueTask(int a, int b)
+        {
+            await Task.Yield();
+            return a + b + Number;
+        }
+
+        public void DoNothing(int a, int b)
+        {
+        }
+
+        public async Task DoNothingAsyncTask(int a, int b)
+        {
+            await Task.Yield();
+        }
+
+        public async ValueTask DoNothingAsyncValueTask(int a, int b)
+        {
+            await Task.Yield();
+        }
     }
 
     [Test]
-    public void CreateCallHandler_Invoke()
+    public async Task CreateCallHandler_Invoke_Functor()
     {
         var instance = new SampleClass
         {
@@ -27,14 +53,126 @@ public class TestCallHandlerGenerator
 
         var handler = CallHandlerGenerator.For(serializers, instance.Add);
 
-        var result = handler.HandleCall(new ObjectValue(new OrderedDictionary<string, SnapshotValue>()
+        var result = await handler.HandleCall(new ObjectValue(new OrderedDictionary<string, SnapshotValue>()
             {
                 { "a", new Integer32Value(1) },
                 { "b", new Integer32Value(2) }
             }
         )) as Integer32Value;
-        
+
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Value, Is.EqualTo(instance.Add(1, 2)));
+    }
+
+    [Test]
+    public async Task CreateCallHandler_Invoke_AsyncFunctor_Task()
+    {
+        var instance = new SampleClass
+        {
+            Number = TestContext.CurrentContext.Random.Next(0, 100)
+        };
+
+        var serializers = new SerializerContainer().UseProxyingSerializers();
+
+        var handler = CallHandlerGenerator.For(serializers, instance.AddAsyncTask);
+
+        var result = await handler.HandleCall(new ObjectValue(new OrderedDictionary<string, SnapshotValue>()
+            {
+                { "a", new Integer32Value(1) },
+                { "b", new Integer32Value(2) }
+            }
+        )) as Integer32Value;
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value, Is.EqualTo(instance.Add(1, 2)));
+    }
+
+    [Test]
+    public async Task CreateCallHandler_Invoke_AsyncFunctor_ValueTask()
+    {
+        var instance = new SampleClass
+        {
+            Number = TestContext.CurrentContext.Random.Next(0, 100)
+        };
+
+        var serializers = new SerializerContainer().UseProxyingSerializers();
+
+        var handler = CallHandlerGenerator.For(serializers, instance.AddAsyncValueTask);
+
+        var result = await handler.HandleCall(new ObjectValue(new OrderedDictionary<string, SnapshotValue>()
+            {
+                { "a", new Integer32Value(1) },
+                { "b", new Integer32Value(2) }
+            }
+        )) as Integer32Value;
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Value, Is.EqualTo(instance.Add(1, 2)));
+    }
+
+    [Test]
+    public async Task CreateCallHandler_Invoke_Action()
+    {
+        var instance = new SampleClass
+        {
+            Number = TestContext.CurrentContext.Random.Next(0, 100)
+        };
+
+        var serializers = new SerializerContainer();
+
+        var handler = CallHandlerGenerator.For(serializers, instance.DoNothing);
+
+        var result = await handler.HandleCall(new ObjectValue(new OrderedDictionary<string, SnapshotValue>()
+            {
+                { "a", new Integer32Value(1) },
+                { "b", new Integer32Value(2) }
+            }
+        ));
+
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public async Task CreateCallHandler_Invoke_AsyncAction_Task()
+    {
+        var instance = new SampleClass
+        {
+            Number = TestContext.CurrentContext.Random.Next(0, 100)
+        };
+
+        var serializers = new SerializerContainer();
+
+        var handler = CallHandlerGenerator.For(serializers, instance.DoNothingAsyncTask);
+
+        var result = await handler.HandleCall(new ObjectValue(new OrderedDictionary<string, SnapshotValue>()
+            {
+                { "a", new Integer32Value(1) },
+                { "b", new Integer32Value(2) }
+            }
+        ));
+
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public async Task CreateCallHandler_Invoke_AsyncAction_ValueTask()
+    {
+        var instance = new SampleClass
+        {
+            Number = TestContext.CurrentContext.Random.Next(0, 100)
+        };
+
+        var serializers = new SerializerContainer();
+
+        var handler = CallHandlerGenerator.For(serializers, instance.DoNothingAsyncValueTask);
+
+        var result = await handler.HandleCall(new ObjectValue(new OrderedDictionary<string, SnapshotValue>()
+            {
+                { "a", new Integer32Value(1) },
+                { "b", new Integer32Value(2) }
+            }
+        ));
+
+        Assert.That(result, Is.Null);
     }
 }

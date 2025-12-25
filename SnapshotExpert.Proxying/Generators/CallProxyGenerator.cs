@@ -1,9 +1,9 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EmitToolbox;
+using EmitToolbox.Builders;
 using EmitToolbox.Extensions;
 using EmitToolbox.Symbols;
 using EmitToolbox.Utilities;
@@ -16,6 +16,11 @@ using DynamicMethod = EmitToolbox.DynamicMethod;
 
 namespace SnapshotExpert.Remoting.Generators;
 
+/// <summary>
+/// This class generates call-proxy classes,
+/// which can create delegates that redirect calls into <see cref="ICallProxy"/> instances
+/// by serializing arguments and deserializing the result.
+/// </summary>
 public class CallProxyGenerator
 {
     private static readonly CustomAttributeBuilder AttributeRequiredMember =
@@ -30,6 +35,19 @@ public class CallProxyGenerator
     private static readonly DynamicResourceForMethod<CallProxyGenerator> Cache =
         new(Generate, "CallProxyGenerators_");
 
+    private readonly Type _clientType;
+
+    private readonly Type _delegateType;
+
+    private readonly MethodInfo _proxyMethod;
+
+    private CallProxyGenerator(Type delegateType, Type clientType, MethodInfo proxyMethod)
+    {
+        _delegateType = delegateType;
+        _clientType = clientType;
+        _proxyMethod = proxyMethod;
+    }
+
     /// <summary>
     /// Get or create the call-proxy generator for the specified delegate type.
     /// </summary>
@@ -37,12 +55,6 @@ public class CallProxyGenerator
     /// <returns>Generator that can generate proxy delegates of the specified delegate type.</returns>
     public static CallProxyGenerator For(MethodInfo targetMethod)
         => Cache[targetMethod];
-    
-    private readonly Type _clientType;
-
-    private readonly Type _delegateType;
-
-    private readonly MethodInfo _proxyMethod;
 
     /// <summary>
     /// Create a call-proxy delegate with the specified proxy.
@@ -58,7 +70,7 @@ public class CallProxyGenerator
             .CreateInstance(_clientType, proxy)!
             .Autowire(serializers.AsInjections()));
     }
-    
+
     /// <summary>
     /// Create a call-proxy delegate with the specified proxy.
     /// </summary>
@@ -71,13 +83,6 @@ public class CallProxyGenerator
     public TDelegate CreateDelegate<TDelegate>(ISerializerProvider serializers, ICallProxy proxy)
         where TDelegate : Delegate
         => (TDelegate)CreateDelegate(serializers, proxy);
-
-    private CallProxyGenerator(Type delegateType, Type clientType, MethodInfo proxyMethod)
-    {
-        _delegateType = delegateType;
-        _clientType = clientType;
-        _proxyMethod = proxyMethod;
-    }
 
     private static CallProxyGenerator Generate(DynamicAssembly assembly, MethodInfo targetMethod)
     {
@@ -133,24 +138,27 @@ public class CallProxyGenerator
                 targetMethod.ReturnType, parameterDefinitions, methodModifier: MethodModifier.Virtual)
             : context.TypeContext.MethodFactory.Instance.DefineAction("Invoke",
                 parameterDefinitions, methodModifier: MethodModifier.Virtual);
+        var asyncBuilder = method.DefineAsyncStateMachine();
+        var asyncMethod = asyncBuilder.Method;
 
-        var symbolThis = method.This();
+        var fieldCallProxy = asyncBuilder.Capture(
+            context.ProxyField.SymbolOf<ICallProxy>(method, method.This()));
+
         var arguments = targetMethod.GetParameters()
-            .Select((parameter, index) =>
-                (Name: parameter.Name ?? index.ToString(), Symbol: method.Argument(index, parameter.ParameterType)))
+            .Select((parameter, index) => (
+                Name: parameter.Name ?? index.ToString(),
+                Symbol: asyncBuilder.Capture(method.Argument(index, parameter.ParameterType))))
             .ToArray();
 
-        var fieldProxy = context.ProxyField.SymbolOf<ICallProxy>(method, symbolThis);
-
         // If the call transporter is null, throw an exception.
-        using (method.If(fieldProxy.IsNull()))
+        using (asyncMethod.If(fieldCallProxy.IsNull()))
         {
-            method.ThrowException<NullReferenceException>(
+            asyncMethod.ThrowException<NullReferenceException>(
                 "This call client is not bound to a call proxy.");
         }
 
-        // Serialize arguments.
-        var variableSerializedArguments = method.Variable<ObjectValue>();
+        // Deserialize arguments.
+        var variableSerializedArguments = asyncMethod.Variable<ObjectValue>();
         if (arguments.Length > 0)
         {
             variableSerializedArguments.AssignNew();
@@ -158,10 +166,11 @@ public class CallProxyGenerator
             {
                 var symbolArgumentNode = variableSerializedArguments.Invoke(
                     target => target.CreateNode(Any<string>.Value),
-                    [method.Value(argument.Name)]);
+                    [asyncMethod.Literal(argument.Name)]);
                 var argumentBasicType = argument.Symbol.BasicType;
-                var symbolSerializer = context.GetSerializerField(argumentBasicType)
-                    .SymbolOf(method, symbolThis);
+                var symbolSerializer = asyncBuilder.Capture(
+                    context.GetSerializerField(argumentBasicType)
+                        .SymbolOf(method, method.This()));
                 symbolSerializer.Invoke(
                     typeof(SnapshotSerializer<>).MakeGenericType(argumentBasicType)
                         .GetMethod(nameof(SnapshotSerializer<>.SaveSnapshot),
@@ -171,49 +180,66 @@ public class CallProxyGenerator
         }
 
         // Perform the call.
-        var variableSerializedResult = fieldProxy
-            .Invoke(target => target.Call(Any<ObjectValue>.Value), [variableSerializedArguments])
-            .ToSymbol();
+        var variableSerializedResult = asyncBuilder.Await(
+            fieldCallProxy.Invoke(
+                target => target.Call(Any<ObjectValue>.Value),
+                [variableSerializedArguments]));
 
-        if (!hasReturnValue)
+        // If the target method returns void-like types (Task, ValueTask, etc.),
+        // complete the builder immediately.
+        if (asyncBuilder.ResultType == typeof(void))
         {
+            asyncBuilder.Finish(null);
+
+            // If the target method is async:
+            if (method.ReturnType == asyncBuilder.TaskType)
+            {
+                (method as DynamicMethod<Action<ISymbol>>)!.Return(asyncBuilder.Execute());
+                return method;
+            }
+
+            // If the target method is not async:
+            asyncBuilder
+                .Execute()
+                .Invoke(asyncBuilder.TaskType.GetMethod(nameof(Task.Wait), [])!);
             (method as DynamicMethod<Action>)!.Return();
             return method;
         }
 
+        var variableSnapshotNode = asyncMethod.New(
+            () => new SnapshotNode(Any<string>.Value),
+            [asyncMethod.Literal("#")]);
+        variableSnapshotNode.SetPropertyValue(
+            target => target.Value, variableSerializedResult);
 
-        // Deserialize result.
-        var resultType = targetMethod.ReturnType;
-        var fieldResultSerializer = context.GetSerializerField(resultType).SymbolOf(method, symbolThis);
-        if (resultType.IsGenericType)
+        // Deserialize the result.
+        var fieldResultSerializer = asyncBuilder.Capture(
+            context.GetSerializerField(asyncBuilder.ResultType)
+                .SymbolOf(method, method.This()));
+
+        var variableRawResult = asyncMethod.Variable(asyncBuilder.ResultType);
+
+        fieldResultSerializer.Invoke(
+            fieldResultSerializer.ContentType.GetMethod(nameof(SnapshotSerializer<>.NewInstance),
+                [asyncBuilder.ResultType.MakeByRefType()])!,
+            [variableRawResult]);
+        fieldResultSerializer.Invoke(
+            fieldResultSerializer.ContentType.GetMethod(nameof(SnapshotSerializer<>.LoadSnapshot),
+                [asyncBuilder.ResultType.MakeByRefType(), typeof(SnapshotNode)])!,
+            [variableRawResult, variableSnapshotNode]);
+
+        asyncBuilder.Finish(variableRawResult);
+
+        if (targetMethod.ReturnType == asyncBuilder.TaskType)
         {
-            var resultGenericDefinition = resultType.GetGenericTypeDefinition();
-            if (resultGenericDefinition == typeof(ValueTask<>))
-            {
-                var symbolTask = method.Invoke(
-                    typeof(Utilities).GetMethod(nameof(Utilities.DeserializeResultAsValueTask))!
-                        .MakeGenericMethod(resultType.GetGenericArguments()[0]),
-                    [fieldResultSerializer, variableSerializedResult])!;
-                (method as DynamicMethod<Action<ISymbol>>)!.Return(symbolTask);
-                return method;
-            }
-
-            if (resultGenericDefinition == typeof(Task))
-            {
-                var symbolValueTask = method.Invoke(
-                    typeof(Utilities).GetMethod(nameof(Utilities.DeserializeResultAsTask))!
-                        .MakeGenericMethod(resultType.GetGenericArguments()[0]),
-                    [fieldResultSerializer, variableSerializedResult])!;
-                (method as DynamicMethod<Action<ISymbol>>)!.Return(symbolValueTask);
-                return method;
-            }
+            (method as DynamicMethod<Action<ISymbol>>)!.Return(asyncBuilder.Execute());
+            return method;
         }
 
-        var variableResult = method.Invoke(
-            typeof(Utilities).GetMethod(nameof(Utilities.DeserializeResult))!
-                .MakeGenericMethod(resultType),
-            [fieldResultSerializer, variableSerializedResult])!;
-        (method as DynamicMethod<Action<ISymbol>>)!.Return(variableResult);
+        var symbolWaitedResult = asyncBuilder
+            .Execute()
+            .GetPropertyValue(asyncBuilder.TaskType.GetProperty(nameof(Task<>.Result))!);
+        (method as DynamicMethod<Action<ISymbol>>)!.Return(symbolWaitedResult);
         return method;
     }
 
@@ -246,6 +272,21 @@ public class CallProxyGenerator
 
     public static class Utilities
     {
+        public static async Task AwaitAsTask(ValueTask<SnapshotValue?> task)
+        {
+            await task;
+        }
+
+        public static async ValueTask AwaitAsValueTask(ValueTask<SnapshotValue?> task)
+        {
+            await task;
+        }
+
+        public static void Wait(ValueTask<SnapshotValue?> task)
+        {
+            _ = task.Result;
+        }
+
         public static TResult DeserializeResult<TResult>(
             SnapshotSerializer<TResult> serializer, ValueTask<SnapshotValue?> result)
         {
