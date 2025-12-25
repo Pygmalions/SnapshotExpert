@@ -117,6 +117,7 @@ public static partial class SerializerGenerator
                     .Invoke(
                         () => RuntimeHelpers.GetUninitializedObject(Any<Type>.Value),
                         [method.Literal(context.TargetType)])
+                    .CastTo(context.TargetType)
                     .ToSymbol(variableInstance);
             }
 
