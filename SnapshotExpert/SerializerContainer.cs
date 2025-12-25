@@ -10,19 +10,9 @@ namespace SnapshotExpert;
 public class SerializerContainer : ISerializerContainer
 {
     /// <summary>
-    /// Chained provider of all sources in this container.
-    /// </summary>
-    private readonly IInjectionProvider _injector;
-
-    /// <summary>
     /// Container of registered by-type serializers.
     /// </summary>
     private readonly InjectionContainer _container = new();
-
-    /// <summary>
-    /// Provider of serializers provided by factories or the generator.
-    /// </summary>
-    private readonly InjectionFunctorProvider _resolver;
 
     /// <summary>
     /// Indicate whether to use the serializer generator or not.
@@ -37,17 +27,14 @@ public class SerializerContainer : ISerializerContainer
     private readonly bool _enableRedirector;
 
     /// <summary>
-    /// Injections for instantiating serializers.
+    /// Chained provider of all sources in this container.
     /// </summary>
-    public IInjectionProvider? Injections { get; init; }
+    private readonly IInjectionProvider _injector;
 
     /// <summary>
-    /// Logger for this container to use.
+    /// Provider of serializers provided by factories or the generator.
     /// </summary>
-    public ILogger<SerializerContainer>? Logger { protected get; init; }
-
-    public IList<ISerializerContainer.FactoryDelegate> Factories { get; } =
-        new List<ISerializerContainer.FactoryDelegate>();
+    private readonly InjectionFunctorProvider _resolver;
 
     /// <summary>
     /// Instantiate a serializer container.
@@ -73,6 +60,8 @@ public class SerializerContainer : ISerializerContainer
             Injections!
         );
         _container.AddSingleton(this);
+        _container.AddSingleton(typeof(ISerializerProvider), this, null);
+        _container.AddSingleton(typeof(ISerializerContainer), this, null);
 
         _enableGenerator = enableGenerator;
         _enableRedirector = enableRedirector;
@@ -85,61 +74,17 @@ public class SerializerContainer : ISerializerContainer
     }
 
     /// <summary>
-    /// Generate a snapshot serializer for the specified target type
-    /// and register it as a singleton in the container.
+    /// Injections for instantiating serializers.
     /// </summary>
-    /// <param name="serializerType">Serializer type to request.</param>
-    /// <param name="key">Optional key to register with the serializer.</param>
-    /// <param name="target">Injection target.</param>
-    /// <returns>Item containing the generated serializer.</returns>
-    private InjectionItem? GenerateSerializer(Type serializerType, object? key, InjectionTarget target)
-    {
-        if (!serializerType.IsGenericType ||
-            serializerType.GetGenericTypeDefinition() != typeof(SnapshotSerializer<>))
-            return null;
+    public IInjectionProvider? Injections { get; init; }
 
-        var targetType = serializerType.GetGenericArguments()[0];
+    /// <summary>
+    /// Logger for this container to use.
+    /// </summary>
+    public ILogger<SerializerContainer>? Logger { protected get; init; }
 
-        // Search for the designated serializer.
-        if (targetType.GetCustomAttribute<UsingSnapshotSerializerAttribute>() is
-            { } designation)
-        {
-            return InjectionItem.Singleton(_injector.NewObject(designation.SerializerType));
-        }
-
-        // Search in factories.
-        foreach (var factory in Factories)
-        {
-            if (factory(targetType, _injector) is { } factorySerializer)
-                return InjectionItem.Singleton(factorySerializer);
-        }
-
-        // Generate a redirector if it is an interface.
-        if (_enableRedirector && targetType.IsInterface)
-        {
-            /*
-             * Generate redirector for interface types that cannot be handled by built-in extensions.
-             * Note:
-             * Abstract classes are not selected here because abstract classes are allowed to have
-             * fields and properties with implementations.
-             * When a serializer for an abstract class is requested,
-             * the user may want the generator to handle the serialization of this abstract class as the
-             * base type of another derived concrete class.
-             */
-            var redirector = (SnapshotSerializer)Activator.CreateInstance(
-                typeof(SerializerRedirector<>).MakeGenericType(targetType))!;
-            return InjectionItem.Singleton(redirector);
-        }
-
-        if (_enableGenerator)
-        {
-            // Use the generator to generate the serializer.
-            return InjectionItem.Singleton(
-                _injector.NewObject(SerializerGenerator.For(targetType)));
-        }
-
-        return null;
-    }
+    public IList<ISerializerContainer.FactoryDelegate> Factories { get; } =
+        new List<ISerializerContainer.FactoryDelegate>();
 
     /// <summary>
     /// Get a snapshot serializer for the specified target type.
@@ -189,6 +134,65 @@ public class SerializerContainer : ISerializerContainer
         _container.InvalidateCache();
         _resolver.InvalidateCache();
     }
-    
+
     public IInjectionProvider AsInjections() => _injector;
+
+    /// <summary>
+    /// Generate a snapshot serializer for the specified target type
+    /// and register it as a singleton in the container.
+    /// </summary>
+    /// <param name="serializerType">Serializer type to request.</param>
+    /// <param name="key">Optional key to register with the serializer.</param>
+    /// <param name="target">Injection target.</param>
+    /// <returns>Item containing the generated serializer.</returns>
+    private InjectionItem? GenerateSerializer(Type serializerType, object? key, InjectionTarget target)
+    {
+        // Todo: Add checks for recursive reference in the serializer instantiation.
+
+        if (!serializerType.IsGenericType ||
+            serializerType.GetGenericTypeDefinition() != typeof(SnapshotSerializer<>))
+            return null;
+
+        var targetType = serializerType.GetGenericArguments()[0];
+
+        // Search for the designated serializer.
+        if (targetType.GetCustomAttribute<UsingSnapshotSerializerAttribute>() is
+            { } designation)
+        {
+            return InjectionItem.Singleton(_injector.NewObject(designation.SerializerType));
+        }
+
+        // Search in factories.
+        foreach (var factory in Factories)
+        {
+            if (factory(targetType, _injector) is { } factorySerializer)
+                return InjectionItem.Singleton(factorySerializer);
+        }
+
+        // Generate a redirector if it is an interface.
+        if (_enableRedirector && targetType.IsInterface)
+        {
+            /*
+             * Generate redirector for interface types that cannot be handled by built-in extensions.
+             * Note:
+             * Abstract classes are not selected here because abstract classes are allowed to have
+             * fields and properties with implementations.
+             * When a serializer for an abstract class is requested,
+             * the user may want the generator to handle the serialization of this abstract class as the
+             * base type of another derived concrete class.
+             */
+            var redirector = (SnapshotSerializer)Activator.CreateInstance(
+                typeof(SerializerRedirector<>).MakeGenericType(targetType))!;
+            return InjectionItem.Singleton(redirector);
+        }
+
+        if (_enableGenerator)
+        {
+            // Use the generator to generate the serializer.
+            return InjectionItem.Singleton(
+                _injector.NewObject(SerializerGenerator.For(targetType)));
+        }
+
+        return null;
+    }
 }

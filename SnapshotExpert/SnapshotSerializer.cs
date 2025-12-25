@@ -11,11 +11,6 @@ public abstract class SnapshotSerializer
     public abstract Type TargetType { get; }
 
     /// <summary>
-    /// Context of this snapshot serializer.
-    /// </summary>
-    public required SerializerContainer Context { get; init; }
-
-    /// <summary>
     /// Schema of the snapshots that this serializer handles.
     /// </summary>
     [field: MaybeNull]

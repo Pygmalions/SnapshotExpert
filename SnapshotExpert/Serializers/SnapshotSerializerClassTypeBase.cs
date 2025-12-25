@@ -7,13 +7,9 @@ namespace SnapshotExpert.Serializers;
 public abstract class SnapshotSerializerClassTypeBase<TTarget>
     : SnapshotSerializer<TTarget> where TTarget : class
 {
-    protected abstract void OnSaveSnapshot(in TTarget target, SnapshotNode snapshot, SnapshotWritingScope scope);
-
-    protected abstract void OnLoadSnapshot(ref TTarget target, SnapshotNode snapshot, SnapshotReadingScope scope);
+    private readonly bool _enabledTypeRedirection;
 
     private readonly bool _hasDefaultConstructor;
-
-    private readonly bool _enabledTypeRedirection;
 
     /// <summary>
     /// This constructor will configure the behavior of default <see cref="NewInstance"/>
@@ -52,6 +48,15 @@ public abstract class SnapshotSerializerClassTypeBase<TTarget>
     protected SnapshotSerializerClassTypeBase() : this(null, null)
     {
     }
+
+    /// <summary>
+    /// Context of this snapshot serializer.
+    /// </summary>
+    public required ISerializerProvider Context { get; init; }
+
+    protected abstract void OnSaveSnapshot(in TTarget target, SnapshotNode snapshot, SnapshotWritingScope scope);
+
+    protected abstract void OnLoadSnapshot(ref TTarget target, SnapshotNode snapshot, SnapshotReadingScope scope);
 
     public override void NewInstance(out TTarget instance)
         => instance = _hasDefaultConstructor ? Activator.CreateInstance<TTarget>() : null!;

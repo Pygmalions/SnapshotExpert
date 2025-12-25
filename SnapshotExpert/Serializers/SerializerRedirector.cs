@@ -10,6 +10,11 @@ namespace SnapshotExpert.Serializers;
 /// <typeparam name="TTarget">Type of instances that this redirector can handle.</typeparam>
 public class SerializerRedirector<TTarget> : SnapshotSerializer<TTarget> where TTarget : class
 {
+    /// <summary>
+    /// Context of this snapshot serializer.
+    /// </summary>
+    public required ISerializerProvider Context { get; init; }
+
     public override void NewInstance(out TTarget instance)
         => instance = null!;
 
