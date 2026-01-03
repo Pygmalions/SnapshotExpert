@@ -1,10 +1,17 @@
 ﻿namespace SnapshotExpert.Data.Values.Primitives;
 
-public class BooleanValue(bool value) : PrimitiveValue
+public class BooleanValue(bool value) : PrimitiveValue, IStringConvertibleValue
 {
+    private string _value;
     public override string DebuggerString => $"{Value}";
 
     public bool Value { get; set; } = value;
+
+    string IStringConvertibleValue.Value
+    {
+        get => Value.ToString();
+        set => Value = bool.Parse(value);
+    }
 
     public override int GetContentHashCode() => Value.GetHashCode();
 

@@ -31,67 +31,76 @@ public static class SnapshotConvertibleExtensions
         public ArrayValue AsArray => self?.Value as ArrayValue ?? throw new InvalidCastException(
             $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to an array value.");
 
-        public bool AsBoolean => self?.Value is BooleanValue value
-            ? value.Value
-            : throw new InvalidCastException(
-                $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'bool'.");
+        public bool AsBoolean
+        {
+            get
+            {
+                return self?.Value switch
+                {
+                    BooleanValue booleanValue => booleanValue.Value,
+                    StringValue stringValue when bool.TryParse(stringValue.Value, out var parsedValue) => parsedValue,
+                    _ => throw new InvalidCastException(
+                        $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'bool'.")
+                };
+            }
+        }
 
-        public string AsString => self?.Value is StringValue value
+        public string AsString => self?.Value is IStringConvertibleValue value
             ? value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'string'.");
 
-        public byte AsByte => self?.Value is IInteger32Value value
+        public byte AsByte => self?.Value is IInteger32ConvertibleValue value
             ? (byte)value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'byte'.");
 
-        public sbyte AsSByte => self?.Value is IInteger32Value value
+        public sbyte AsSByte => self?.Value is IInteger32ConvertibleValue value
             ? (sbyte)value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'sbyte'.");
 
-        public short AsInt16 => self?.Value is IInteger32Value value
+        public short AsInt16 => self?.Value is IInteger32ConvertibleValue value
             ? (short)value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'short'.");
 
-        public ushort AsUInt16 => self?.Value is IInteger32Value value
+        public ushort AsUInt16 => self?.Value is IInteger32ConvertibleValue value
             ? (ushort)value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'ushort'.");
 
-        public int AsInt32 => self?.Value is IInteger32Value value
+        public int AsInt32 => self?.Value is IInteger32ConvertibleValue value
             ? value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'int'.");
 
-        public uint AsUInt32 => self?.Value is IInteger32Value value
+        public uint AsUInt32 => self?.Value is IInteger32ConvertibleValue value
             ? (uint)value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'uint'.");
 
-        public long AsInt64 => self?.Value is IInteger64Value value
+        public long AsInt64 => self?.Value is IInteger64ConvertibleValue value
             ? value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'long'.");
 
-        public ulong AsUInt64 => self?.Value is IInteger64Value value
+        public ulong AsUInt64 => self?.Value is IInteger64ConvertibleValue value
             ? (ulong)value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'ulong'.");
 
-        public double AsDouble => self?.Value is IFloat64Value value
+        public double AsDouble => self?.Value is IFloat64ConvertibleValue value
             ? value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'float'.");
 
-        public float AsFloat => self?.Value is IFloat64Value value
+        public float AsFloat => self?.Value is IFloat64ConvertibleValue value
             ? (float)value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'double'.");
 
-        public decimal AsDecimal => self?.Value is IDecimalValue value
+        public decimal AsDecimal => self?.Value is IDecimalConvertibleValue value
             ? value.Value
             : throw new InvalidCastException(
                 $"Cannot convert snapshot value '{self?.Value?.GetType().ToString() ?? "<Empty>"}' to 'decimal'.");

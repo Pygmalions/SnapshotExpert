@@ -1,6 +1,6 @@
 ﻿namespace SnapshotExpert.Data.Values.Primitives;
 
-public class StringValue(string value = "") : PrimitiveValue
+public class StringValue(string value = "") : PrimitiveValue, IStringConvertibleValue
 {
     public override string DebuggerString => $"\"{Value}\"";
 
