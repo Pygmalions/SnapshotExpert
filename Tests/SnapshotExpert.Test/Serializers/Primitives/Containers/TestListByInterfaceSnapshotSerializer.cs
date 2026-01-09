@@ -46,9 +46,9 @@ public class TestListByInterfaceSnapshotSerializer
         }
 
         public int Count => throw new NotSupportedException();
-        
+
         public bool IsReadOnly => throw new NotSupportedException();
-        
+
         public int IndexOf(TElement item)
         {
             throw new NotSupportedException();
@@ -70,7 +70,7 @@ public class TestListByInterfaceSnapshotSerializer
             set => throw new NotSupportedException();
         }
     }
-    
+
     [Test,
      TestCase(typeof(List<int>),
          ExpectedResult = typeof(ListByInterfaceSnapshotSerializer<int, List<int>, List<int>>)),
@@ -84,6 +84,38 @@ public class TestListByInterfaceSnapshotSerializer
     {
         var context = new SerializerContainer();
         return context.GetSerializer(type)?.GetType() ?? typeof(void);
+    }
+
+    public class NumberClass(int number)
+    {
+        public int Number => number;
+    }
+
+    [Test]
+    public void SaveSnapshotAndLoadSnapshot_Class()
+    {
+        var context = new SerializerContainer();
+
+        var serializer = context.RequireSerializer<List<NumberClass>>();
+
+        var target = new List<NumberClass>()
+        {
+            new(TestContext.CurrentContext.Random.Next()),
+            new(TestContext.CurrentContext.Random.Next()),
+            new(TestContext.CurrentContext.Random.Next()),
+            new(TestContext.CurrentContext.Random.Next()),
+        };
+
+        var node = new SnapshotNode();
+
+        serializer.SaveSnapshot(target, node);
+
+        serializer.NewInstance(out var restored);
+        serializer.LoadSnapshot(ref restored, node);
+
+        Assert.That(restored, Is.Not.Null);
+        Assert.That(restored.Select(element => element.Number),
+            Is.EquivalentTo(target.Select(element => element.Number)));
     }
 
     [Test]
@@ -142,7 +174,7 @@ public class TestListByInterfaceSnapshotSerializer
         Assert.That(restored, Is.Not.Null);
         Assert.That(restored, Is.EquivalentTo(target));
     }
-    
+
     [Test]
     public void SaveSnapshotAndLoadSnapshot_IntoNotEmpty_MoreThanSnapshot_Remove()
     {
@@ -161,7 +193,7 @@ public class TestListByInterfaceSnapshotSerializer
         var node = new SnapshotNode();
 
         serializer.SaveSnapshot(target, node);
-        
+
         var restored = new List<int>
         {
             TestContext.CurrentContext.Random.Next(),
