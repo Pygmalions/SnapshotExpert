@@ -181,8 +181,8 @@ public class SerializerContainer : ISerializerContainer
              * the user may want the generator to handle the serialization of this abstract class as the
              * base type of another derived concrete class.
              */
-            var redirector = (SnapshotSerializer)Activator.CreateInstance(
-                typeof(SerializerRedirector<>).MakeGenericType(targetType))!;
+            var redirector = (SnapshotSerializer)_injector.NewObject(
+                typeof(SerializerRedirector<>).MakeGenericType(targetType));
             return InjectionItem.Singleton(redirector);
         }
 
