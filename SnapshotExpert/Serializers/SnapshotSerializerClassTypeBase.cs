@@ -73,25 +73,30 @@ public abstract class SnapshotSerializerClassTypeBase<TTarget>
         // Store the object in the snapshot node.
         snapshot.Object = target;
 
-        // Check if the target object is a reference to an existing object in the scope.
-        if (scope.RecordObject(snapshot, target) is { } reference)
-        {
-            snapshot.Value = reference;
-            return;
-        }
-
         // Check if the target object is of a subtype of the target type.
         if (_enabledTypeRedirection)
         {
             var actualType = target.GetType();
             if (target.GetType() != typeof(TTarget))
             {
+                if (scope.Objects.TryGetValue(target, out var referencedNode))
+                {
+                    snapshot.Value = new InternalReferenceValue(referencedNode);
+                }
+
                 // Store the actual type in the snapshot node.
                 snapshot.Type = target.GetType();
                 // Redirect the serialization to the serializer for the actual type.
                 Context.RequireSerializer(actualType).SaveSnapshotAsObject(target, snapshot, scope);
                 return;
             }
+        }
+
+        // Check if the target object is a reference to an existing object in the scope.
+        if (scope.RecordObject(snapshot, target) is { } reference)
+        {
+            snapshot.Value = reference;
+            return;
         }
 
         OnSaveSnapshot(target, snapshot, scope);
