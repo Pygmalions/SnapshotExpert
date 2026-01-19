@@ -28,7 +28,7 @@ public record ObjectSchema() : PrimitiveSchema(JsonValueType.Object)
 
     protected override void OnGenerate(ObjectValue schema)
     {
-        if (OptionalProperties?.Count > 0 || RequiredProperties?.Count > 0)
+        if (OptionalProperties != null || RequiredProperties != null)
         {
             var properties = schema.CreateNode("properties").AssignValue(new ObjectValue());
 
@@ -41,7 +41,7 @@ public record ObjectSchema() : PrimitiveSchema(JsonValueType.Object)
                     property.Generate(properties.CreateNode(name).AssignValue(new ObjectValue()));
         }
 
-        if (RequiredProperties?.Count > 0)
+        if (RequiredProperties != null)
         {
             var propertyNames = schema.CreateNode("required").AssignValue(new ArrayValue());
 
