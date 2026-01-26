@@ -2,7 +2,6 @@
 
 public class BooleanValue(bool value) : PrimitiveValue, IStringConvertibleValue
 {
-    private string _value;
     public override string DebuggerString => $"{Value}";
 
     public bool Value { get; set; } = value;

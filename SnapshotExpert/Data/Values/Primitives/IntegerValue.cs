@@ -45,7 +45,6 @@ public class Integer32Value(int value = 0) : PrimitiveValue,
 
 public class Integer64Value(long value = 0) : PrimitiveValue, INumberConvertibleValue, IStringConvertibleValue
 {
-    private string _value;
     public override string DebuggerString => $"(Integer64) {Value}";
 
     public long Value { get; set; } = value;

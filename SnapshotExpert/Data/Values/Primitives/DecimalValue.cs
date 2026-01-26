@@ -4,7 +4,6 @@ namespace SnapshotExpert.Data.Values.Primitives;
 
 public class DecimalValue(decimal value = 0) : PrimitiveValue, INumberConvertibleValue, IStringConvertibleValue
 {
-    private string _value;
     public override string DebuggerString => $"{Value}";
 
     public decimal Value { get; set; } = value;

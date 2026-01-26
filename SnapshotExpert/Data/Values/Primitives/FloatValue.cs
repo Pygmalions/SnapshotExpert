@@ -4,7 +4,6 @@ namespace SnapshotExpert.Data.Values.Primitives;
 
 public class Float64Value(double value = 0) : PrimitiveValue, INumberConvertibleValue, IStringConvertibleValue
 {
-    private string _value;
     public override string DebuggerString => $"{Value}";
 
     public double Value { get; set; } = value;
