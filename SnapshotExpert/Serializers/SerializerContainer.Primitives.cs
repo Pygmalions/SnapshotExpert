@@ -16,7 +16,7 @@ internal static class SerializerContainerExtensionsForPrimitives
 
         if (targetType.IsEnum)
             serializerType = EnumSerializerGenerator.GetSerializerType(targetType);
-        else if (targetType.IsArray && targetType.GetArrayRank() > 1)
+        else if (targetType.IsArray)
         {
             if (targetType.GetArrayRank() == 1)
                 serializerType = typeof(ArraySnapshotSerializer<>)
