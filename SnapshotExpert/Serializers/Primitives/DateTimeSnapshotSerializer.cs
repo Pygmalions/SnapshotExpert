@@ -34,11 +34,11 @@ public class DateTimeSnapshotSerializer : SnapshotSerializer<DateTime>
             Format = StringSchema.BuiltinFormats.DateTime
         };
     }
-    
+
     public override void NewInstance(out DateTime instance) => instance = default;
 
     public override void SaveSnapshot(in DateTime target, SnapshotNode snapshot, SnapshotWritingScope scope)
-        => snapshot.Value = new DateTimeValue(target);
+        => snapshot.Value = new DateTimeValue(target.ToUniversalTime());
 
     public override void LoadSnapshot(ref DateTime target, SnapshotNode snapshot, SnapshotReadingScope scope)
         => target = snapshot.AsDateTimeOffset.DateTime.ToLocalTime();
