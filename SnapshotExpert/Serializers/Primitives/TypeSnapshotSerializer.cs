@@ -13,7 +13,7 @@ public class TypeSnapshotSerializer : SnapshotSerializer<Type>
         {
             Title = "Type Name",
             Description = "Assembly qualified name of the type, " +
-                          "consisting of assembly name and type name, " +
+                          "consisting of type name and assembly name, " +
                           "separated by comma, e.g. 'System.String, System.Private.CoreLib'."
         };
     }
