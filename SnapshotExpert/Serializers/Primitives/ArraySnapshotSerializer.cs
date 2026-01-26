@@ -29,7 +29,7 @@ public class ArraySnapshotSerializer<TElement> : SnapshotSerializerClassTypeBase
 
     protected override void OnSaveSnapshot(in TElement[] target, SnapshotNode snapshot, SnapshotWritingScope scope)
     {
-        var array = new ArrayValue(target.Length);
+        var array = snapshot.AssignValue(new ArrayValue(target.Length));
         foreach (var element in target)
             ElementSerializer.SaveSnapshot(element, array.CreateNode(), scope);
     }
