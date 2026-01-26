@@ -14,9 +14,12 @@ public class TestSnapshotNode
         var a = obj.CreateNode("a");
         var b = obj.CreateNode("b");
 
-        Assert.That(root.Path, Is.EqualTo("#"));
-        Assert.That(a.Path, Is.EqualTo("#/a"));
-        Assert.That(b.Path, Is.EqualTo("#/b"));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(root.Path, Is.EqualTo("#"));
+            Assert.That(a.Path, Is.EqualTo("#/a"));
+            Assert.That(b.Path, Is.EqualTo("#/b"));
+        }
 
         // nested level
         var aObj = a.AssignValue(new ObjectValue());
@@ -38,14 +41,20 @@ public class TestSnapshotNode
 
         // Rename root and ensure child paths are invalidated and recomputed
         root.Name = "root"; // internal setter is visible to tests
-        Assert.That(root.Path, Is.EqualTo("root"));
-        Assert.That(a.Path, Is.EqualTo("root/a"));
-        Assert.That(b.Path, Is.EqualTo("root/a/b"));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(root.Path, Is.EqualTo("root"));
+            Assert.That(a.Path, Is.EqualTo("root/a"));
+            Assert.That(b.Path, Is.EqualTo("root/a/b"));
+        }
 
         // Rename middle node
         a.Name = "x";
-        Assert.That(a.Path, Is.EqualTo("root/x"));
-        Assert.That(b.Path, Is.EqualTo("root/x/b"));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(a.Path, Is.EqualTo("root/x"));
+            Assert.That(b.Path, Is.EqualTo("root/x/b"));
+        }
     }
 
     [Test]
@@ -57,18 +66,21 @@ public class TestSnapshotNode
         var aObj = a.AssignValue(new ObjectValue());
         var b = aObj.CreateNode("b");
 
-        Assert.That(root.Locate("#/a/b"), Is.SameAs(b));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(root.Locate("#/a/b"), Is.SameAs(b));
 
-        // Special tokens
-        Assert.That(root.Locate(""), Is.Null);
-        Assert.That(root.Locate("."), Is.SameAs(root));
-        Assert.That(root.Locate(".."), Is.Null); // root has no parent
+            // Special tokens
+            Assert.That(root.Locate(""), Is.Null);
+            Assert.That(root.Locate("."), Is.SameAs(root));
+            Assert.That(root.Locate(".."), Is.Null); // root has no parent
 
-        // Unknown child
-        Assert.That(root.Locate("#/nope"), Is.Null);
+            // Unknown child
+            Assert.That(root.Locate("#/nope"), Is.Null);
 
-        // Empty segment becomes null current
-        Assert.That(root.Locate("#//a"), Is.Null);
+            // Empty segment becomes null current
+            Assert.That(root.Locate("#//a"), Is.Null);
+        }
     }
 
     [Test]
@@ -80,13 +92,16 @@ public class TestSnapshotNode
         var aObj = a.AssignValue(new ObjectValue());
         var b = aObj.CreateNode("b");
 
-        // First segment must equal current node name
-        Assert.That(root.Locate(new[] { "wrong", "a", "b" }), Is.Null);
+        using (Assert.EnterMultipleScope())
+        {
+            // First segment must equal current node name
+            Assert.That(root.Locate(new[] { "wrong", "a", "b" }), Is.Null);
 
-        // Relative tokens
-        Assert.That(root.Locate(new[] { "#", "a", ".", "..", "a", "b" }), Is.SameAs(b));
+            // Relative tokens
+            Assert.That(root.Locate(new[] { "#", "a", ".", "..", "a", "b" }), Is.SameAs(b));
 
-        // Going above root yields null in the middle, and finally null
-        Assert.That(root.Locate(new[] { "#", "..", "a" }), Is.Null);
+            // Going above root yields null in the middle, and finally null
+            Assert.That(root.Locate(new[] { "#", "..", "a" }), Is.Null);
+        }
     }
 }

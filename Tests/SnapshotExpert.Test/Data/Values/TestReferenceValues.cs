@@ -25,13 +25,16 @@ public class TestReferenceValues
             Assert.That(r1.ContentEquals(null), Is.False);
         }
 
-        // Hash codes: when reference is set, equals referenced node's hash; otherwise default type hash
-        Assert.That(r1.GetContentHashCode(), Is.EqualTo(a.GetHashCode()));
-        Assert.That(rNull.GetContentHashCode(), Is.EqualTo(typeof(InternalReferenceValue).GetHashCode()));
+        using (Assert.EnterMultipleScope())
+        {
+            // Hash codes: when reference is set, equals referenced node's hash; otherwise default type hash
+            Assert.That(r1.GetContentHashCode(), Is.EqualTo(a.GetHashCode()));
+            Assert.That(rNull.GetContentHashCode(), Is.EqualTo(typeof(InternalReferenceValue).GetHashCode()));
 
-        // Debugger string should include the referenced path or null
-        Assert.That(r1.DebuggerString, Does.Contain(a.Path));
-        Assert.That(rNull.DebuggerString, Does.Contain("null"));
+            // Debugger string should include the referenced path or null
+            Assert.That(r1.DebuggerString, Does.Contain(a.Path));
+            Assert.That(rNull.DebuggerString, Does.Contain("null"));
+        }
     }
 
     [Test]
@@ -49,12 +52,15 @@ public class TestReferenceValues
             Assert.That(e1.ContentEquals(null), Is.False);
         }
 
-        // Hash codes: when identifier is set, equals string's hash; otherwise default type hash
-        Assert.That(e1.GetContentHashCode(), Is.EqualTo("id-123".GetHashCode()));
-        Assert.That(eNull.GetContentHashCode(), Is.EqualTo(typeof(ExternalReferenceValue).GetHashCode()));
+        using (Assert.EnterMultipleScope())
+        {
+            // Hash codes: when identifier is set, equals string's hash; otherwise default type hash
+            Assert.That(e1.GetContentHashCode(), Is.EqualTo("id-123".GetHashCode()));
+            Assert.That(eNull.GetContentHashCode(), Is.EqualTo(typeof(ExternalReferenceValue).GetHashCode()));
 
-        // Debugger string should include the identifier or null
-        Assert.That(e1.DebuggerString, Does.Contain("id-123"));
-        Assert.That(eNull.DebuggerString, Does.Contain("null"));
+            // Debugger string should include the identifier or null
+            Assert.That(e1.DebuggerString, Does.Contain("id-123"));
+            Assert.That(eNull.DebuggerString, Does.Contain("null"));
+        }
     }
 }
