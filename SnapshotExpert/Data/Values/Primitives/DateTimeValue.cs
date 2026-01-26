@@ -2,6 +2,10 @@
 
 public class DateTimeValue(DateTimeOffset value = default) : PrimitiveValue
 {
+    public DateTimeValue(DateTime value) : this(new DateTimeOffset(value.ToUniversalTime()))
+    {
+    }
+
     public override string DebuggerString => $"{Value}";
 
     public DateTimeOffset Value { get; set; } = value;
