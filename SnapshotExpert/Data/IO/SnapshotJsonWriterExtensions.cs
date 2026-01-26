@@ -86,8 +86,8 @@ public static class SnapshotJsonWriterExtensions
                     throw new InvalidOperationException("Failed to write node: node has no self.Value assigned.");
                 case PrimitiveValue primitive:
                 {
-                    var hasValueMetadata = self.Type != null;
-                    if (hasValueMetadata)
+                    var valueHasMetadata = self.Type != null;
+                    if (valueHasMetadata)
                     {
                         writer.WriteStartObject();
                         DumpNodeMetadata(writer, self, withMode: false);
@@ -95,7 +95,7 @@ public static class SnapshotJsonWriterExtensions
                     }
 
                     WritePrimitiveValue(writer, primitive);
-                    if (hasValueMetadata)
+                    if (valueHasMetadata)
                         writer.WriteEndObject();
                     return;
                 }
@@ -134,8 +134,8 @@ public static class SnapshotJsonWriterExtensions
                     writer.WriteEndObject();
                     break;
                 case ArrayValue array:
-                    var hasArrayMetadata = self.Type != null || self.Mode != SnapshotModeType.Patching;
-                    if (hasArrayMetadata)
+                    var arrayHasMetadata = self.Type != null || self.Mode != SnapshotModeType.Patching;
+                    if (arrayHasMetadata)
                     {
                         writer.WriteStartObject();
                         DumpNodeMetadata(writer, self);
@@ -146,7 +146,7 @@ public static class SnapshotJsonWriterExtensions
                     foreach (var child in array.DeclaredNodes)
                         child.Dump(writer);
                     writer.WriteEndArray();
-                    if (hasArrayMetadata)
+                    if (arrayHasMetadata)
                         writer.WriteEndObject();
                     break;
                 default:

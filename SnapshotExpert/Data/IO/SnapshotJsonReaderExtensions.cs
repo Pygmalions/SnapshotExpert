@@ -81,6 +81,8 @@ public static class SnapshotJsonReaderExtensions
             }
 
             reader.Read(); // Consume the end object token.
+
+            node.Value ??= new ObjectValue();
         }
 
         /// <summary>

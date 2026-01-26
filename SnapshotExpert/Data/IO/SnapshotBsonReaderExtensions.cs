@@ -57,7 +57,7 @@ public static class SnapshotBsonReaderExtensions
                                 throw new Exception(
                                     "Failed to parse node: $value field is not in the header part.");
                             SnapshotNode.ParseValue(node, reader, root);
-                            continue;
+                            break;
 
                         default:
                             // Mark exiting the header part.
@@ -72,6 +72,8 @@ public static class SnapshotBsonReaderExtensions
             }
 
             reader.ReadEndDocument();
+
+            node.Value ??= new ObjectValue();
         }
 
         /// <summary>
