@@ -57,30 +57,30 @@ internal static class SerializerContainerExtensionsForPrimitives
         where TContainer : ISerializerContainer
     {
         container
-            .WithSerializer<bool, BooleanSnapshotSerializer>()
-            .WithSerializer<string, StringSnapshotSerializer>()
-            .WithSerializer<char, CharacterSnapshotSerializer>()
-            .WithSerializer<sbyte, Integer8SnapshotSerializer>()
-            .WithSerializer<byte, UnsignedInteger8SnapshotSerializer>()
-            .WithSerializer<short, Integer16SnapshotSerializer>()
-            .WithSerializer<ushort, UnsignedInteger16SnapshotSerializer>()
-            .WithSerializer<int, Integer32SnapshotSerializer>()
-            .WithSerializer<uint, UnsignedInteger32SnapshotSerializer>()
-            .WithSerializer<long, Integer64SnapshotSerializer>()
-            .WithSerializer<ulong, UnsignedInteger64SnapshotSerializer>()
-            .WithSerializer<float, Float32SnapshotSerializer>()
-            .WithSerializer<double, Float64SnapshotSerializer>()
-            .WithSerializer<decimal, DecimalSnapshotSerializer>();
+            .UseSerializer<bool, BooleanSnapshotSerializer>()
+            .UseSerializer<string, StringSnapshotSerializer>()
+            .UseSerializer<char, CharacterSnapshotSerializer>()
+            .UseSerializer<sbyte, Integer8SnapshotSerializer>()
+            .UseSerializer<byte, UnsignedInteger8SnapshotSerializer>()
+            .UseSerializer<short, Integer16SnapshotSerializer>()
+            .UseSerializer<ushort, UnsignedInteger16SnapshotSerializer>()
+            .UseSerializer<int, Integer32SnapshotSerializer>()
+            .UseSerializer<uint, UnsignedInteger32SnapshotSerializer>()
+            .UseSerializer<long, Integer64SnapshotSerializer>()
+            .UseSerializer<ulong, UnsignedInteger64SnapshotSerializer>()
+            .UseSerializer<float, Float32SnapshotSerializer>()
+            .UseSerializer<double, Float64SnapshotSerializer>()
+            .UseSerializer<decimal, DecimalSnapshotSerializer>();
 
-        container.WithSerializer<Type, TypeSnapshotSerializer>();
-        container.WithSerializer<byte[], ByteArraySnapshotSerializer>();
+        container.UseSerializer<Type, TypeSnapshotSerializer>();
+        container.UseSerializer<byte[], ByteArraySnapshotSerializer>();
 
-        container.WithSerializer<Guid, GuidSnapshotSerializer>();
-        container.WithSerializer<DateTime, DateTimeSnapshotSerializer>();
-        container.WithSerializer<DateTimeOffset, DateTimeOffsetSnapshotSerializer>();
-        container.WithSerializer<TimeSpan, TimeSpanSnapshotSerializer>();
+        container.UseSerializer<Guid, GuidSnapshotSerializer>();
+        container.UseSerializer<DateTime, DateTimeSnapshotSerializer>();
+        container.UseSerializer<DateTimeOffset, DateTimeOffsetSnapshotSerializer>();
+        container.UseSerializer<TimeSpan, TimeSpanSnapshotSerializer>();
 
-        container.WithSerializer<object, SerializerRedirector<object>>();
+        container.UseSerializer<object, SerializerRedirector<object>>();
 
         container.Factories.Add(CreateSerializerForPrimitive);
 

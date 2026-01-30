@@ -10,7 +10,7 @@ public static class SerializerContainerExtensions
         /// <typeparam name="TTarget">The type of the object to be serialized.</typeparam>
         /// <typeparam name="TSerializer">The type of the serializer to be used for <typeparamref name="TTarget"/>.</typeparam>
         /// <returns>The updated <see cref="ISerializerContainer"/> instance.</returns>
-        public ISerializerContainer WithSerializer<TTarget, TSerializer>()
+        public ISerializerContainer UseSerializer<TTarget, TSerializer>()
             where TSerializer : SnapshotSerializer<TTarget>
         {
             container.AddSerializer(typeof(TTarget), typeof(TSerializer));
@@ -28,7 +28,7 @@ public static class SerializerContainerExtensions
         /// The serializer instance to be used for <typeparamref name="TTarget"/>.
         /// </param>
         /// <returns>The updated <see cref="ISerializerContainer"/> instance.</returns>
-        public ISerializerContainer WithSerializer<TTarget, TSerializer>(TSerializer serializer)
+        public ISerializerContainer UseSerializer<TTarget, TSerializer>(TSerializer serializer)
             where TSerializer : SnapshotSerializer<TTarget>
         {
             container.AddSerializer(typeof(TTarget), serializer);
