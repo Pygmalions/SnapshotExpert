@@ -67,7 +67,8 @@ public static class SnapshotBsonWriterExtensions
                 writer.WriteDecimal128(decimalValue.Value);
                 break;
             case DateTimeValue dateTimeValue:
-                writer.WriteDateTime(dateTimeValue.ToUtcTime.Millisecond);
+                writer.WriteDateTime((long)(dateTimeValue.Value.ToUniversalTime() - DateTimeOffset.UnixEpoch)
+                    .TotalMilliseconds);
                 break;
             default:
                 throw new Exception($"Unsupported primitive self.Value type: '{target.GetType()}'.");
